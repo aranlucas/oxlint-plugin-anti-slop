@@ -17,6 +17,10 @@ type Substitution = {
 };
 
 type Substitutions = ReadonlyMap<string, Substitution>;
+type DeclaredTypeBinding = {
+  readonly alias: ESTree.TSTypeAliasDeclaration | null;
+  readonly name: string;
+};
 
 export type TypeAliasEnvironment = {
   readonly aliases: readonly ESTree.TSTypeAliasDeclaration[];
@@ -54,10 +58,7 @@ function enclosingTypeScope(node: ESTree.Node): TypeScope {
   return node;
 }
 
-function declaredTypeBinding(node: ESTree.Node): {
-  readonly alias: ESTree.TSTypeAliasDeclaration | null;
-  readonly name: string;
-} | null {
+function declaredTypeBinding(node: ESTree.Node): DeclaredTypeBinding | null {
   if (node.type === "TSTypeAliasDeclaration") {
     return { alias: node, name: node.id.name };
   }
@@ -190,10 +191,10 @@ function aliasSubstitutions(
   base: Substitutions,
 ): Substitutions | null {
   const parameters = alias.typeParameters?.params ?? [];
-  const arguments_ = reference.typeArguments?.params ?? [];
+  const typeArguments = reference.typeArguments?.params ?? [];
   const next = new Map(base);
   for (const [index, parameter] of parameters.entries()) {
-    const explicitArgument = arguments_[index];
+    const explicitArgument = typeArguments[index];
     const argument = explicitArgument ?? parameter.default;
     if (argument === null || argument === undefined) return null;
     const argumentSubstitutions = explicitArgument === undefined ? next : base;
@@ -227,8 +228,7 @@ export function resolvedTypeMatches(
         if (alias !== null && !resolvingAliases.has(alias)) {
           const nextSubstitutions = aliasSubstitutions(alias, current, substitutions);
           if (nextSubstitutions !== null) {
-            const nextResolving = new Set(resolvingAliases);
-            nextResolving.add(alias);
+            const nextResolving = new Set([...resolvingAliases, alias]);
             return evaluate(alias.typeAnnotation, nextSubstitutions, nextResolving);
           }
         }

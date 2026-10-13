@@ -6,6 +6,17 @@ type BroadTypeKind = "top" | "object" | "record";
 type KnownValueEvidence = {
   readonly type: ESTree.TSType | null;
 };
+type ScopeReference = {
+  readonly identifier: ESTree.Node;
+  readonly resolved: Variable | null;
+};
+type ScopeReferences = readonly { readonly references: readonly ScopeReference[] }[];
+type WidenedBinding = {
+  readonly broadKind: BroadTypeKind;
+  readonly evidence: KnownValueEvidence;
+  readonly declaredAt: number;
+  readonly boundary: ESTree.Node | null;
+};
 
 const functionBoundaryTypes = new Set([
   "ArrowFunctionExpression",
@@ -135,9 +146,37 @@ function isDefinitelyObjectType(type: ESTree.TSType): boolean {
       return unwrapped.types.every(isDefinitelyObjectType);
     case "TSTypeOperator":
       return unwrapped.operator === "readonly" && isDefinitelyObjectType(unwrapped.typeAnnotation);
-    default:
+    case "TSAnyKeyword":
+    case "TSBigIntKeyword":
+    case "TSBooleanKeyword":
+    case "TSConditionalType":
+    case "TSImportType":
+    case "TSIndexedAccessType":
+    case "TSInferType":
+    case "TSIntrinsicKeyword":
+    case "TSJSDocNonNullableType":
+    case "TSJSDocNullableType":
+    case "TSJSDocUnknownType":
+    case "TSLiteralType":
+    case "TSNamedTupleMember":
+    case "TSNeverKeyword":
+    case "TSNullKeyword":
+    case "TSNumberKeyword":
+    case "TSParenthesizedType":
+    case "TSStringKeyword":
+    case "TSSymbolKeyword":
+    case "TSTemplateLiteralType":
+    case "TSThisType":
+    case "TSTypePredicate":
+    case "TSTypeQuery":
+    case "TSTypeReference":
+    case "TSUndefinedKeyword":
+    case "TSUnionType":
+    case "TSUnknownKeyword":
+    case "TSVoidKeyword":
       return false;
   }
+  return false;
 }
 
 function isDefinitelyNarrowerRecordType(type: ESTree.TSType): boolean {
@@ -169,12 +208,7 @@ function functionBoundary(node: ESTree.Node): ESTree.Node | null {
 }
 
 function resolvedVariableForIdentifier(
-  scopes: readonly {
-    readonly references: readonly {
-      readonly identifier: ESTree.Node;
-      readonly resolved: Variable | null;
-    }[];
-  }[],
+  scopes: ScopeReferences,
   identifier: ESTree.IdentifierReference,
 ): Variable | null {
   for (const scope of scopes) {
@@ -242,8 +276,7 @@ function knownValueEvidence(
 
   const declarator = variableDeclarator(variable);
   if (
-    declarator === null ||
-    declarator.parent.type !== "VariableDeclaration" ||
+    declarator?.parent.type !== "VariableDeclaration" ||
     declarator.parent.kind !== "const" ||
     declarator.init === null ||
     variable.references.some((reference) => reference.isWrite() && !reference.init) ||
@@ -263,16 +296,10 @@ function knownValueEvidence(
 function widenedBinding(
   variable: Variable,
   scopes: Parameters<typeof resolvedVariableForIdentifier>[0],
-): {
-  readonly broadKind: BroadTypeKind;
-  readonly evidence: KnownValueEvidence;
-  readonly declaredAt: number;
-  readonly boundary: ESTree.Node | null;
-} | null {
+): WidenedBinding | null {
   const declarator = variableDeclarator(variable);
   if (
-    declarator === null ||
-    declarator.parent.type !== "VariableDeclaration" ||
+    declarator?.parent.type !== "VariableDeclaration" ||
     declarator.parent.kind !== "const" ||
     declarator.id.type !== "Identifier" ||
     declarator.init === null ||

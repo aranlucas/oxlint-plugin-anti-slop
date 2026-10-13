@@ -61,8 +61,7 @@ function hasKnownEvidence(
   if (variable === null || visitedVariables.has(variable)) return false;
   const declarator = variableDeclarator(variable);
   if (
-    declarator === null ||
-    declarator.init === null ||
+    declarator?.init == null ||
     !isStableConstVariable(variable, declarator)
   ) {
     return false;
@@ -89,7 +88,7 @@ function localFunctionForCall(
   if (isFunctionExpression(unwrapped)) return unwrapped;
   if (unwrapped.type !== "Identifier") return null;
   const variable = resolveVariable(sourceCode, unwrapped);
-  if (variable === null || variable.defs.length !== 1) return null;
+  if (variable?.defs.length !== 1) return null;
   const [definition] = variable.defs;
   if (definition === undefined) return null;
   if (definition.type === "FunctionName" && isFunctionExpression(definition.node)) {
@@ -170,8 +169,7 @@ function hasKnownCallArgumentEvidence(
   }
   const declarator = variableDeclarator(variable);
   if (
-    declarator === null ||
-    declarator.init === null ||
+    declarator?.init == null ||
     !isStableConstVariable(variable, declarator)
   ) {
     return false;
@@ -317,7 +315,7 @@ export const noKnownValueWideningRule = defineRule({
         const variable = resolveVariable(context.sourceCode, node.left);
         if (variable === null) return;
         const declarator = variableDeclarator(variable);
-        if (declarator === null || declarator.id.type !== "Identifier") return;
+        if (declarator?.id.type !== "Identifier") return;
         reportFlow(
           node.right,
           targetFromAnnotation(declarator.id.typeAnnotation),

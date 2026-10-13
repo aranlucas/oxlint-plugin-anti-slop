@@ -1,5 +1,7 @@
 import type { ESTree, Scope, SourceCode, Variable } from "@oxlint/plugins";
 
+type ArrayMethodTarget = { readonly name: string; readonly object: ESTree.Node };
+
 /** Unwrap syntax-only wrappers when inspecting array methods and accumulator references. */
 export function unwrapArrayExpression(node: ESTree.Node): ESTree.Node {
   while (
@@ -31,7 +33,7 @@ export function resolveArrayBinding(sourceCode: SourceCode, node: ESTree.Node): 
 /** Read static method names, including computed string literals, without evaluating expressions. */
 export function arrayMethodTarget(
   node: ESTree.Node,
-): { readonly name: string; readonly object: ESTree.Node } | null {
+): ArrayMethodTarget | null {
   node = unwrapArrayExpression(node);
   if (node.type !== "MemberExpression") return null;
   const property = node.property;
