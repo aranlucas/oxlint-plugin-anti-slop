@@ -39,15 +39,20 @@
     "test": "node --test 'src/**/*.test.ts'",
     "test:dist": "node scripts/smoke-dist.mjs",
     "typecheck": "tsc --noEmit",
-    "prepublishOnly": "pnpm check"
+    "prepublishOnly": "pnpm check",
+    "lint:fix": "oxlint --fix",
+    "format": "oxfmt --write",
+    "format:check": "oxfmt --check"
   },
   "dependencies": {
     "@oxlint/plugins": "^1.88.0"
   },
   "devDependencies": {
+    "@aranlucas/oxforge": "^0.1.3",
     "@types/node": "26.6.5",
-    "oxfmt": "^0.72.0",
-    "oxlint": "1.88.0",
+    "oxfmt": "^0.73.0",
+    "oxlint": "^1.88.0",
+    "oxlint-tsgolint": "^7.0.2004",
     "typescript": "7.0.2"
   },
   "peerDependencies": {
