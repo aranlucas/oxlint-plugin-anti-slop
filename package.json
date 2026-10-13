@@ -1,0 +1,68 @@
+{
+  "name": "@aranlucas/oxlint-plugin-anti-slop",
+  "version": "0.1.0",
+  "description": "Opinionated Oxlint rules that reject low-evidence TypeScript and JavaScript patterns. Packaged fork of dmmulroy/anti-slop.",
+  "keywords": [
+    "oxlint",
+    "oxlint-plugin",
+    "eslint",
+    "eslintplugin",
+    "lint"
+  ],
+  "homepage": "https://github.com/aranlucas/oxlint-plugin-anti-slop#readme",
+  "bugs": "https://github.com/aranlucas/oxlint-plugin-anti-slop/issues",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aranlucas/oxlint-plugin-anti-slop.git"
+  },
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./effect": {
+      "types": "./dist/effect/index.d.ts",
+      "default": "./dist/effect/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "UPSTREAM.md"
+  ],
+  "scripts": {
+    "build": "rm -rf dist && tsc -p tsconfig.build.json && cp src/vendor/eslint-stylistic/padding-line-options.d.ts src/vendor/eslint-stylistic/LICENSE src/vendor/eslint-stylistic/UPSTREAM.md dist/vendor/eslint-stylistic/",
+    "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm test:dist",
+    "lint": "oxlint src",
+    "test": "node --test 'src/**/*.test.ts'",
+    "test:dist": "node scripts/smoke-dist.mjs",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "pnpm check"
+  },
+  "dependencies": {
+    "@oxlint/plugins": "^1.88.0"
+  },
+  "devDependencies": {
+    "@types/node": "26.2.0",
+    "oxlint": "1.88.0",
+    "typescript": "7.0.2"
+  },
+  "peerDependencies": {
+    "oxlint": ">=1.78.0"
+  },
+  "peerDependenciesMeta": {
+    "oxlint": {
+      "optional": true
+    }
+  },
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "packageManager": "pnpm@12.9.1"
+}
