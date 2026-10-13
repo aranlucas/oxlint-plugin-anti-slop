@@ -47,26 +47,6 @@ Requires `oxlint` 1.78 or newer and Node 22.18 or newer.
 
 The same `jsPlugins` and `rules` go under `lint` in an `oxlint.config.ts` or a Vite+ config.
 
-### Effect rules (opt-in)
-
-Enable these only in repos that use [Effect](https://effect.website):
-
-```jsonc
-{
-  "jsPlugins": [
-    { "name": "anti-slop", "specifier": "@aranlucas/oxlint-plugin-anti-slop" },
-    { "name": "anti-slop-effect", "specifier": "@aranlucas/oxlint-plugin-anti-slop/effect" }
-  ],
-  "rules": {
-    "anti-slop-effect/no-manual-effect-error-tag": "error",
-    "anti-slop-effect/no-manual-tag-comparison": "error",
-    "anti-slop-effect/no-manual-tagged-construction": "error",
-    "anti-slop-effect/no-service-constructor-imports": "error",
-    "anti-slop-effect/prefer-effect-match": "error"
-  }
-}
-```
-
 ### ESLint
 
 The plugins are wrapped with `eslintCompatPlugin`, so they also load in ESLint flat config:

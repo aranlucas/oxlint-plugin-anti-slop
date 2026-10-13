@@ -18,12 +18,11 @@ try {
     JSON.stringify({
       jsPlugins: [
         { name: "anti-slop", specifier: dist("index.js") },
-        { name: "anti-slop-effect", specifier: dist("effect/index.js") },
       ],
       rules: {
         "anti-slop/no-reflect-get": "error",
         "anti-slop/require-readable-spacing": "error",
-        "anti-slop-effect/no-manual-tag-comparison": "error",
+        "anti-slop/no-unknown-parameters": "error",
       },
     }),
   );
@@ -31,7 +30,7 @@ try {
     probe,
     [
       "export const value = Reflect.get(globalThis, 'x');",
-      "export const isA = (input: { _tag: string }) => input._tag === 'A';",
+      "export function read(input: unknown) { return input; }",
       "",
     ].join("\n"),
   );
@@ -44,7 +43,7 @@ try {
   assert.equal(result.status, 1, output);
   assert.match(output, /anti-slop\(no-reflect-get\)/, output);
   assert.match(output, /anti-slop\(require-readable-spacing\)/, output);
-  assert.match(output, /anti-slop-effect\(no-manual-tag-comparison\)/, output);
+  assert.match(output, /anti-slop\(no-unknown-parameters\)/, output);
   console.log("dist smoke test passed");
 } finally {
   rmSync(probeRoot, { recursive: true, force: true });
