@@ -47,6 +47,7 @@
   "$schema": "./node_modules/oxlint/configuration_schema.json",
   "ignorePatterns": [
     "**/node_modules/**",
+    "src/vendor/eslint-stylistic/**",
     "**/dist/**",
     "**/build/**",
     "**/coverage/**",
