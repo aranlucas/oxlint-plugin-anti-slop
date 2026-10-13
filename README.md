@@ -18,9 +18,7 @@ Requires `oxlint` 1.78 or newer and Node 22.18 or newer.
 
 ```jsonc
 {
-  "jsPlugins": [
-    { "name": "anti-slop", "specifier": "@aranlucas/oxlint-plugin-anti-slop" }
-  ],
+  "jsPlugins": [{ "name": "anti-slop", "specifier": "@aranlucas/oxlint-plugin-anti-slop" }],
   "rules": {
     "oxc/no-accumulating-spread": "error",
     "anti-slop/no-array-filter-map": "error",
@@ -40,8 +38,8 @@ Requires `oxlint` 1.78 or newer and Node 22.18 or newer.
     "anti-slop/no-unsafe-dictionary-type": "error",
     "anti-slop/no-widen-then-assert": "error",
     "anti-slop/require-readable-spacing": "error",
-    "anti-slop/require-safety-comment-for-type-assertion": "error"
-  }
+    "anti-slop/require-safety-comment-for-type-assertion": "error",
+  },
 }
 ```
 
@@ -54,7 +52,9 @@ The plugins are wrapped with `eslintCompatPlugin`, so they also load in ESLint f
 ```js
 import antiSlop from "@aranlucas/oxlint-plugin-anti-slop";
 
-export default [{ plugins: { "anti-slop": antiSlop }, rules: { "anti-slop/no-reflect-get": "error" } }];
+export default [
+  { plugins: { "anti-slop": antiSlop }, rules: { "anti-slop/no-reflect-get": "error" } },
+];
 ```
 
 ## Develop

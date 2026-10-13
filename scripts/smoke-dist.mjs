@@ -16,9 +16,7 @@ try {
   writeFileSync(
     config,
     JSON.stringify({
-      jsPlugins: [
-        { name: "anti-slop", specifier: dist("index.js") },
-      ],
+      jsPlugins: [{ name: "anti-slop", specifier: dist("index.js") }],
       rules: {
         "anti-slop/no-reflect-get": "error",
         "anti-slop/require-readable-spacing": "error",

@@ -2,11 +2,11 @@
 
 The rule sources in `src/` are copied from [dmmulroy/anti-slop](https://github.com/dmmulroy/anti-slop) (MIT, © Dillon Mulroy).
 
-| Field | Value |
-| --- | --- |
-| Upstream commit | `c44ef22ca116d0ba62a3ff663a0bd13a3f3fa40b` (2026-09-10) |
-| Copied | `src/**` (generic rules, shared helpers, vendored ESLint Stylistic, RuleTester suites) |
-| Not copied | `src/effect/` (Effect rules), `skills/`, `scripts/sync-skill-assets.mjs`, the install skill's asset mirror |
+| Field           | Value                                                                                                      |
+| --------------- | ---------------------------------------------------------------------------------------------------------- |
+| Upstream commit | `c44ef22ca116d0ba62a3ff663a0bd13a3f3fa40b` (2026-09-10)                                                    |
+| Copied          | `src/**` (generic rules, shared helpers, vendored ESLint Stylistic, RuleTester suites)                     |
+| Not copied      | `src/effect/` (Effect rules), `skills/`, `scripts/sync-skill-assets.mjs`, the install skill's asset mirror |
 
 ## Local changes
 
