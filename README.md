@@ -61,7 +61,7 @@ export default [
 
 ```bash
 pnpm install
-pnpm check   # lint, typecheck, RuleTester suites, build, dist smoke test
+pnpm check   # lint, typecheck, Vitest/RuleTester suites, build, dist smoke test
 ```
 
 ## Release
@@ -71,3 +71,5 @@ Bump `version` in `package.json`, then create a GitHub release tagged `vX.Y.Z`. 
 ## License
 
 MIT. Original rules © Dillon Mulroy. The vendored ESLint Stylistic code keeps its own license in `src/vendor/eslint-stylistic/LICENSE`.
+
+Tests run through Vitest. `pnpm test:watch` reruns the RuleTester and native CLI cases during development; `pnpm test:dist` keeps checking the compiled package separately.
