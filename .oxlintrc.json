@@ -1,7 +1,4 @@
 {
-  "rules": {
-    "oxc/no-accumulating-spread": "error"
-  },
   "options": {
     "typeAware": true
   },
