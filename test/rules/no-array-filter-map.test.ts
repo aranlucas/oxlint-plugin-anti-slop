@@ -1,6 +1,6 @@
 import { RuleTester } from "oxlint/plugins-dev";
 
-import { noArrayFilterMapRule } from "./no-array-filter-map.ts";
+import { noArrayFilterMapRule } from "@/rules/no-array-filter-map.ts";
 
 const tester = new RuleTester({ languageOptions: { parserOptions: { lang: "ts" } } });
 

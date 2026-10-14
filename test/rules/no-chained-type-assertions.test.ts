@@ -1,6 +1,6 @@
 import { RuleTester } from "oxlint/plugins-dev";
 
-import { noChainedTypeAssertionsRule } from "./no-chained-type-assertions.ts";
+import { noChainedTypeAssertionsRule } from "@/rules/no-chained-type-assertions.ts";
 
 const tester = new RuleTester({ languageOptions: { parserOptions: { lang: "ts" } } });
 

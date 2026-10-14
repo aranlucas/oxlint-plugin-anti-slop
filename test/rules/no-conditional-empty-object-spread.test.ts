@@ -1,6 +1,6 @@
 import { RuleTester } from "oxlint/plugins-dev";
 
-import { noConditionalEmptyObjectSpreadRule } from "./no-conditional-empty-object-spread.ts";
+import { noConditionalEmptyObjectSpreadRule } from "@/rules/no-conditional-empty-object-spread.ts";
 
 const tester = new RuleTester({ languageOptions: { parserOptions: { lang: "ts" } } });
 

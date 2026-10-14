@@ -1,6 +1,6 @@
 import { RuleTester } from "oxlint/plugins-dev";
 
-import { noModuleMockingRule } from "./no-module-mocking.ts";
+import { noModuleMockingRule } from "@/rules/no-module-mocking.ts";
 
 const tester = new RuleTester({ languageOptions: { parserOptions: { lang: "ts" } } });
 
@@ -12,7 +12,7 @@ tester.run("anti-slop/no-module-mocking", noModuleMockingRule, {
     "vi.spyOn(store, 'save');",
     "const vi = { mock() {} }; vi.mock();",
     "function test(jest: { mock(): void }) { jest.mock(); }",
-    "import { vi as localVi } from './helpers'; localVi.mock('./module');",
+    "import { vi as localVi } from '@test/rules/helpers'; localVi.mock('./module');",
   ],
   invalid: [
     { code: "vi.mock('./user-store');", errors: [error] },

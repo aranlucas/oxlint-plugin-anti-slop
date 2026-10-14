@@ -1,6 +1,6 @@
 import { RuleTester } from "oxlint/plugins-dev";
 
-import { noUnknownTypeAliasesRule } from "./no-unknown-type-aliases.ts";
+import { noUnknownTypeAliasesRule } from "@/rules/no-unknown-type-aliases.ts";
 
 const tester = new RuleTester({ languageOptions: { parserOptions: { lang: "ts" } } });
 

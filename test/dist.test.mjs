@@ -7,9 +7,13 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+/** @param {string} path */
 const dist = (path) => fileURLToPath(new URL(`../dist/${path}`, import.meta.url));
+
 const probeRoot = mkdtempSync(join(tmpdir(), "anti-slop-dist-"));
+
 const config = join(probeRoot, "oxlint.json");
+
 const probe = join(probeRoot, "probe.ts");
 
 try {
@@ -36,13 +40,14 @@ try {
   const result = spawnSync("pnpm", ["exec", "oxlint", "--config", config, probe], {
     encoding: "utf8",
   });
+
   const output = `${result.stdout ?? ""}\n${result.stderr ?? ""}`;
 
   assert.equal(result.status, 1, output);
   assert.match(output, /anti-slop\(no-reflect-get\)/, output);
   assert.match(output, /anti-slop\(require-readable-spacing\)/, output);
   assert.match(output, /anti-slop\(no-unknown-parameters\)/, output);
-  console.log("dist smoke test passed");
+  process.stdout.write("dist smoke test passed\n");
 } finally {
   rmSync(probeRoot, { recursive: true, force: true });
 }

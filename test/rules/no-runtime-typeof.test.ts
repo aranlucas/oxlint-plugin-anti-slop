@@ -1,6 +1,6 @@
 import { RuleTester } from "oxlint/plugins-dev";
 
-import { noRuntimeTypeofRule } from "./no-runtime-typeof.ts";
+import { noRuntimeTypeofRule } from "@/rules/no-runtime-typeof.ts";
 
 const tester = new RuleTester({ languageOptions: { parserOptions: { lang: "ts" } } });
 

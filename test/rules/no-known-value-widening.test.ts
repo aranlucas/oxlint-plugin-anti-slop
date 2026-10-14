@@ -1,6 +1,6 @@
 import { RuleTester } from "oxlint/plugins-dev";
 
-import { noKnownValueWideningRule } from "./no-known-value-widening.ts";
+import { noKnownValueWideningRule } from "@/rules/no-known-value-widening.ts";
 
 const tester = new RuleTester({ languageOptions: { parserOptions: { lang: "ts" } } });
 
@@ -29,7 +29,7 @@ tester.run("anti-slop/no-known-value-widening", noKnownValueWideningRule, {
     `${prelude} function create() { return { start: startCommand }; }`,
     `${prelude} interface Commands { readonly start: Command } function create(): Commands { return { start: startCommand }; }`,
     `${prelude} declare function make(): Record<string, Command>; const commands: Record<string, Command> = make();`,
-    `${prelude} import { Commands } from './types'; const commands: Commands = { start: startCommand };`,
+    `${prelude} import { Commands } from '@test/rules/types'; const commands: Commands = { start: startCommand };`,
     `${prelude} type Diet = 'vegan' | 'omnivore'; const labels: Record<Diet, string> = { vegan: 'V', omnivore: 'O' };`,
     `${prelude} type Diet = 'vegan' | 'omnivore'; type Labels = Record<Diet, string>; const labels: Labels = { vegan: 'V', omnivore: 'O' };`,
     `${prelude} type Diet = 'vegan' | 'omnivore'; const labels: Readonly<Record<Diet, string>> = { vegan: 'V', omnivore: 'O' };`,
