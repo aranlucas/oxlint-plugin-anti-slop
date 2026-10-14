@@ -10,7 +10,8 @@ The rule sources in `src/` are copied from [dmmulroy/anti-slop](https://github.c
 
 ## Local changes
 
-- Packaging only. Generic rule sources are unchanged; the opt-in Effect plugin was dropped.
+- The opt-in Effect plugin was dropped. Local formatting and parser-owned AST traversal helpers enforce the shared lint policy without changing rule diagnostics.
+- Runtime `typeof` exceptions are limited to rule-option parsing and ESTree literal discrimination, where representation checks are the boundary contract.
 - Compiled to `dist/` with `tsc` (`rewriteRelativeImportExtensions`) so consumers load plain JavaScript from `node_modules`.
 - `@oxlint/plugins` is a caret dependency instead of an exact pin. At runtime it only provides the `defineRule` and `eslintCompatPlugin` helpers. `oxlint` is an optional peer.
 - Tests run through `node --test` (native type stripping) instead of a chained `tsx` script.

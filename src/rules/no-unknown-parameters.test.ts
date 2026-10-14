@@ -3,6 +3,7 @@ import { RuleTester } from "oxlint/plugins-dev";
 import { noUnknownParametersRule } from "./no-unknown-parameters.ts";
 
 const tester = new RuleTester({ languageOptions: { parserOptions: { lang: "ts" } } });
+
 const error = { messageId: "unknownParameter" };
 
 tester.run("anti-slop/no-unknown-parameters", noUnknownParametersRule, {

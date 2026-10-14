@@ -2,6 +2,7 @@ import { defineRule } from "@oxlint/plugins";
 import type { ESTree } from "@oxlint/plugins";
 
 const FORBIDDEN_SYMBOL_NAME = "shape";
+
 type NamedNode = ESTree.Node & { name: string };
 
 function containsForbiddenSymbolName(name: string): boolean {
@@ -11,7 +12,11 @@ function containsForbiddenSymbolName(name: string): boolean {
 /** Return whether an identifier names a statically accessed member owned by another value. */
 function isBorrowedMemberName(node: ESTree.Node): boolean {
   const parent = node.parent;
-  if (parent?.type !== "MemberExpression") return false;
+
+  if (parent?.type !== "MemberExpression") {
+    return false;
+  }
+
   return parent.property === node && parent.computed === false;
 }
 
@@ -30,7 +35,10 @@ export const noForbiddenTermInSymbolNamesRule = defineRule({
   },
   createOnce(context) {
     const reportForbiddenSymbolName = (node: NamedNode) => {
-      if (!containsForbiddenSymbolName(node.name) || isBorrowedMemberName(node)) return;
+      if (!containsForbiddenSymbolName(node.name) || isBorrowedMemberName(node)) {
+        return;
+      }
+
       context.report({
         node,
         messageId: "forbiddenSymbolName",

@@ -8,14 +8,18 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const probeRoot = mkdtempSync(join(tmpdir(), "anti-slop-spacing-"));
+
 const config = join(probeRoot, "oxlint.json");
+
 const first = join(probeRoot, "first.ts");
+
 const second = join(probeRoot, "second.ts");
 
 function runSpacingLint(...args: string[]) {
   const result = spawnSync("pnpm", ["exec", "oxlint", "--config", config, ...args], {
     encoding: "utf8",
   });
+
   return { status: result.status, output: `${result.stdout ?? ""}\n${result.stderr ?? ""}` };
 }
 

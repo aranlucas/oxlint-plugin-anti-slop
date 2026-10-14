@@ -3,6 +3,7 @@ import { RuleTester } from "oxlint/plugins-dev";
 import { noReflectApplyRule } from "./no-reflect-apply.ts";
 
 const tester = new RuleTester({ languageOptions: { parserOptions: { lang: "ts" } } });
+
 const error = { messageId: "reflectApply" };
 
 tester.run("anti-slop/no-reflect-apply", noReflectApplyRule, {

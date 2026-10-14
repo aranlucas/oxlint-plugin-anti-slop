@@ -3,6 +3,7 @@ import { RuleTester } from "oxlint/plugins-dev";
 import { noConditionalEmptyObjectSpreadRule } from "./no-conditional-empty-object-spread.ts";
 
 const tester = new RuleTester({ languageOptions: { parserOptions: { lang: "ts" } } });
+
 const error = { messageId: "avoid" };
 
 if (noConditionalEmptyObjectSpreadRule.meta?.fixable !== undefined) {
