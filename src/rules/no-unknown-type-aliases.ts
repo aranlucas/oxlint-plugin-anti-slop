@@ -27,10 +27,14 @@ export const noUnknownTypeAliasesRule = defineRule({
     const resolvesToUnknown = (type: ESTree.TSType): boolean =>
       environment !== null &&
       resolvedTypeMatches(type, environment, (resolved, matches) => {
-        if (resolved.type === "TSUnknownKeyword") return true;
+        if (resolved.type === "TSUnknownKeyword") {
+          return true;
+        }
+
         if (resolved.type === "TSParenthesizedType") {
           return matches(resolved.typeAnnotation);
         }
+
         return resolved.type === "TSUnionType" && resolved.types.some(matches);
       });
 
@@ -39,7 +43,10 @@ export const noUnknownTypeAliasesRule = defineRule({
         environment = createTypeAliasEnvironment(node, context.sourceCode.visitorKeys);
       },
       TSTypeAliasDeclaration(node) {
-        if (!resolvesToUnknown(node.typeAnnotation)) return;
+        if (!resolvesToUnknown(node.typeAnnotation)) {
+          return;
+        }
+
         context.report({
           node: node.id,
           messageId: "unknownAlias",

@@ -3,6 +3,7 @@ import { RuleTester } from "oxlint/plugins-dev";
 import { noReflectGetRule } from "./no-reflect-get.ts";
 
 const tester = new RuleTester({ languageOptions: { parserOptions: { lang: "ts" } } });
+
 const error = { messageId: "reflectGet" };
 
 tester.run("anti-slop/no-reflect-get", noReflectGetRule, {
