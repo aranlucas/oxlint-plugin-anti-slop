@@ -1,6 +1,6 @@
 import { RuleTester } from "oxlint/plugins-dev";
 
-import { noReduceAccumulatorCopyRule } from "./no-reduce-accumulator-copy.ts";
+import { noReduceAccumulatorCopyRule } from "@/rules/no-reduce-accumulator-copy.ts";
 
 const tester = new RuleTester({ languageOptions: { parserOptions: { lang: "ts" } } });
 

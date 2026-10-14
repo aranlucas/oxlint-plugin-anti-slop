@@ -1,6 +1,6 @@
 import { RuleTester } from "oxlint/plugins-dev";
 
-import { noUnsafeDictionaryTypeRule } from "./no-unsafe-dictionary-type.ts";
+import { noUnsafeDictionaryTypeRule } from "@/rules/no-unsafe-dictionary-type.ts";
 
 const tester = new RuleTester({ languageOptions: { parserOptions: { lang: "ts" } } });
 
@@ -19,7 +19,7 @@ tester.run("anti-slop/no-unsafe-dictionary-type", noUnsafeDictionaryTypeRule, {
     "type Index<T> = Record<string, T>; type EntityIndex<T extends Entity> = Record<string, T>;",
     "type Safe = Index<Command>; type Index<T> = Record<string, T>;",
     "type A = Map<string, unknown>; type B = ReadonlyMap<string, unknown>; type C = WeakMap<object, unknown>;",
-    "import { Record } from './local'; type A = Record<string, unknown>;",
+    "import { Record } from '@test/rules/local'; type A = Record<string, unknown>;",
     "type Record<K, V> = { key: K; value: V }; type A = Record<string, unknown>;",
     "type Readonly<T> = { value: T }; type A = Record<string, Readonly<unknown>>;",
     "type NonNullable<T> = { value: T }; type A = Record<string, NonNullable<unknown>>;",

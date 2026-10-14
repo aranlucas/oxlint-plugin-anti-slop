@@ -30,7 +30,10 @@ test("the native CLI rejects, fixes, and stabilizes spacing across files", () =>
       config,
       JSON.stringify({
         jsPlugins: [
-          { name: "anti-slop", specifier: fileURLToPath(new URL("../index.ts", import.meta.url)) },
+          {
+            name: "anti-slop",
+            specifier: fileURLToPath(new URL("../../src/index.ts", import.meta.url)),
+          },
         ],
         rules: { "anti-slop/require-readable-spacing": "error" },
       }),

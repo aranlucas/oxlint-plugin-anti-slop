@@ -1,6 +1,6 @@
 import { RuleTester } from "oxlint/plugins-dev";
 
-import { noUnknownParametersRule } from "./no-unknown-parameters.ts";
+import { noUnknownParametersRule } from "@/rules/no-unknown-parameters.ts";
 
 const tester = new RuleTester({ languageOptions: { parserOptions: { lang: "ts" } } });
 

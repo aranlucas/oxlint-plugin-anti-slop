@@ -1,6 +1,6 @@
 import { RuleTester } from "oxlint/plugins-dev";
 
-import { noWidenThenAssertRule } from "./no-widen-then-assert.ts";
+import { noWidenThenAssertRule } from "@/rules/no-widen-then-assert.ts";
 
 const tester = new RuleTester({ languageOptions: { parserOptions: { lang: "ts" } } });
 
