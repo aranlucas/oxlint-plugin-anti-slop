@@ -78,7 +78,11 @@ function hasKnownEvidence(
 
   const declarator = variableDeclarator(variable);
 
-  if (declarator?.init == null || !isStableConstVariable(variable, declarator)) {
+  if (
+    declarator?.init === null ||
+    declarator?.init === undefined ||
+    !isStableConstVariable(variable, declarator)
+  ) {
     return false;
   }
 
@@ -232,7 +236,11 @@ function hasKnownCallArgumentEvidence(
 
   const declarator = variableDeclarator(variable);
 
-  if (declarator?.init == null || !isStableConstVariable(variable, declarator)) {
+  if (
+    declarator?.init === null ||
+    declarator?.init === undefined ||
+    !isStableConstVariable(variable, declarator)
+  ) {
     return false;
   }
 
