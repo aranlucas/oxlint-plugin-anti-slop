@@ -45,6 +45,8 @@ Requires `oxlint` 1.78 or newer and Node 22.18 or newer.
 
 The same `jsPlugins` and `rules` go under `lint` in an `oxlint.config.ts` or a Vite+ config.
 
+`require-readable-spacing` keeps consecutive single-line bindings grouped at any scope, including exported bindings. A binding with its own leading comment starts a new group. Multiline bindings and control-flow boundaries receive blank lines; existing blank lines are preserved.
+
 ### ESLint
 
 The plugins are wrapped with `eslintCompatPlugin`, so they also load in ESLint flat config:
