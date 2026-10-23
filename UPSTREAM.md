@@ -4,7 +4,7 @@ The rule sources in `src/` are copied from [dmmulroy/anti-slop](https://github.c
 
 | Field           | Value                                                                                                      |
 | --------------- | ---------------------------------------------------------------------------------------------------------- |
-| Upstream commit | `c44ef22ca116d0ba62a3ff663a0bd13a3f3fa40b` (2026-09-10)                                                    |
+| Upstream commit | `13909c9e07590f5a85d93c62712259fe14a883f7` (2026-10-13)                                                    |
 | Copied          | `src/**` (generic rules, shared helpers, vendored ESLint Stylistic, RuleTester suites)                     |
 | Not copied      | `src/effect/` (Effect rules), `skills/`, `scripts/sync-skill-assets.mjs`, the install skill's asset mirror |
 
@@ -14,15 +14,14 @@ The rule sources in `src/` are copied from [dmmulroy/anti-slop](https://github.c
 - Runtime `typeof` exceptions are limited to rule-option parsing and ESTree literal discrimination, where representation checks are the boundary contract.
 - Compiled to `dist/` with `tsc` (`rewriteRelativeImportExtensions`) so consumers load plain JavaScript from `node_modules`.
 - `@oxlint/plugins` is a caret dependency instead of an exact pin. At runtime it only provides the `defineRule` and `eslintCompatPlugin` helpers. `oxlint` is an optional peer.
-- Tests run through `node --test` (native type stripping) instead of a chained `tsx` script.
+- Tests run through Vitest with Oxlint's `RuleTester` instead of a chained `tsx` script. Native CLI regressions and a compiled-package smoke test validate plugin loading and autofixes.
 
 ## Updating
 
 ```bash
 git clone https://github.com/dmmulroy/anti-slop /tmp/anti-slop
-diff -ru /tmp/anti-slop/src src        # review upstream changes
-rsync -a --delete --exclude effect/ /tmp/anti-slop/src/ src/
+git -C /tmp/anti-slop diff <pinned-commit> HEAD -- src README.md
 pnpm check
 ```
 
-Then update the commit above, bump the version, and add any new rules to the README config.
+Port the reviewed changes into `src/` and the matching Vitest suites under `test/rules/`, preserving the local changes above. Then run `pnpm check`, update the commit above, bump the version, and add any new rules to the README config.
