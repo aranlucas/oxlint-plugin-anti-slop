@@ -74,4 +74,6 @@ Bump `version` in `package.json`, then create a GitHub release tagged `vX.Y.Z`. 
 
 MIT. Original rules © Dillon Mulroy. The vendored ESLint Stylistic code keeps its own license in `src/vendor/eslint-stylistic/LICENSE`.
 
-Tests run through Vitest. `pnpm test:watch` reruns the RuleTester and native CLI cases during development; `pnpm test:dist` keeps checking the compiled package separately.
+Tests run through two [Vitest projects](https://vitest.dev/guide/projects.html). `pnpm test` and `pnpm test:watch` select the `unit` project for the RuleTester and source CLI cases. After `pnpm build`, run `pnpm test:dist` to select the `dist` project and check the compiled package through the real Oxlint CLI. `pnpm check` runs both in build order, as does CI.
+
+The compiled-package probe uses Vitest's assertions reporting and per-test cleanup instead of a standalone Node test script. It still requires exit status 1 and diagnostics for all three probe rules; a missing build or a failed child process fails the test. This checks a packaging boundary that source-only rule tests cannot cover.

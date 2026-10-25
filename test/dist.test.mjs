@@ -1,6 +1,7 @@
 // Lints probe files with the native Oxlint CLI against the compiled `dist/` entry points,
 // proving the published JavaScript (not the TypeScript sources) loads and reports.
 import assert from "node:assert/strict";
+import { test } from "vitest";
 import { spawnSync } from "node:child_process";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -10,13 +11,14 @@ import { fileURLToPath } from "node:url";
 /** @param {string} path */
 const dist = (path) => fileURLToPath(new URL(`../dist/${path}`, import.meta.url));
 
-const probeRoot = mkdtempSync(join(tmpdir(), "anti-slop-dist-"));
+test("the compiled package loads and reports all probe violations", (t) => {
+  const probeRoot = mkdtempSync(join(tmpdir(), "anti-slop-dist-"));
+  t.onTestFinished(() => rmSync(probeRoot, { recursive: true, force: true }));
 
-const config = join(probeRoot, "oxlint.json");
+  const config = join(probeRoot, "oxlint.json");
 
-const probe = join(probeRoot, "probe.ts");
+  const probe = join(probeRoot, "probe.ts");
 
-try {
   writeFileSync(
     config,
     JSON.stringify({
@@ -43,11 +45,9 @@ try {
 
   const output = `${result.stdout ?? ""}\n${result.stderr ?? ""}`;
 
+  assert.ifError(result.error);
   assert.equal(result.status, 1, output);
   assert.match(output, /anti-slop\(no-reflect-get\)/, output);
   assert.match(output, /anti-slop\(require-readable-spacing\)/, output);
   assert.match(output, /anti-slop\(no-unknown-parameters\)/, output);
-  process.stdout.write("dist smoke test passed\n");
-} finally {
-  rmSync(probeRoot, { recursive: true, force: true });
-}
+});
