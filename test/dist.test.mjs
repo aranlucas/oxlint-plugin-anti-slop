@@ -28,15 +28,18 @@ test("the compiled package loads and reports all probe violations", (t) => {
         "anti-slop/require-readable-spacing": "error",
         "anti-slop/no-unknown-parameters": "error",
         "anti-slop/no-silent-promise-catch": "error",
+        "anti-slop/prefer-import-meta-main": "error",
       },
     }),
   );
   writeFileSync(
     probe,
     [
+      "import { pathToFileURL } from 'node:url';",
       "export const value = Reflect.get(globalThis, 'x');",
       "export function read(input: unknown) { return input; }",
       "Promise.reject(new Error('save failed')).catch(() => undefined);",
+      "export const isMain = import.meta.url === pathToFileURL(process.argv[1]).href;",
       "",
     ].join("\n"),
   );
@@ -53,4 +56,5 @@ test("the compiled package loads and reports all probe violations", (t) => {
   assert.match(output, /anti-slop\(require-readable-spacing\)/, output);
   assert.match(output, /anti-slop\(no-unknown-parameters\)/, output);
   assert.match(output, /anti-slop\(no-silent-promise-catch\)/, output);
+  assert.match(output, /anti-slop\(prefer-import-meta-main\)/, output);
 });
