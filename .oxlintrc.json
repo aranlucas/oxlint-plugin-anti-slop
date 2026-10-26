@@ -30,6 +30,13 @@
   ],
   "overrides": [
     {
+      "files": ["src/rules/prefer-import-meta-main.ts"],
+      "rules": {
+        "eslint/complexity": ["error", { "max": 9, "variant": "classic" }],
+        "eslint/max-depth": ["error", { "max": 3 }]
+      }
+    },
+    {
       "files": [
         "src/rules/no-runtime-typeof.ts",
         "src/rules/require-safety-comment-for-type-assertion.ts",

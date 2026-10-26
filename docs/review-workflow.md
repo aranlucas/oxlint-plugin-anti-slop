@@ -18,6 +18,22 @@ Cleanup and cache failures may be intentionally suppressed, so the rule accepts 
 inside the callback. These examples establish a recurring review obligation, not a claim that
 every suppression is a bug.
 
+The `prefer-import-meta-main` policy arose from the same lexical URL comparison in three
+Lucas Kit maintainer CLIs and the Digits CLI. Lucas Kit's Node 26 migration retained native
+runner regressions for symlink launches, inert imports, and command failures. Digits' declared
+`>=22.18` range needs review before migration: it includes Node 23 and Node 24.0–24.1, which
+lack `import.meta.main`. Two Digits desktop helpers already prefer `import.meta.main` with a
+lexical filename fallback; the policy reports that fallback only when enabled. Job Application
+Agent's Node 20 compatibility helper and Career Ops'
+Node 22.13 compatibility helper are not candidates for an unconditional migration. A match
+establishes a runtime-support review task; it does not authorize dropping older Node versions.
+
+Use native `unicorn/prefer-import-meta-properties` for `dirname` and `filename` modernization.
+Use `prefer-import-meta-main` only in a runtime-compatible file override, following its
+[configuration and scope](../README.md#native-cli-entry-points). Keep the rule disabled in
+older-runtime compatibility helpers. When enabled, it checks comparisons rather than import
+spelling, including shadowing and aliased Node imports. There is no automatic fix.
+
 ## Add and verify a rule
 
 1. Keep the detection narrow. Document what it can prove and what it cannot infer.

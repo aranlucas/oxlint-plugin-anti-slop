@@ -15,6 +15,7 @@ The rule sources in `src/` are copied from [dmmulroy/anti-slop](https://github.c
 - Compiled to `dist/` with `tsc` (`rewriteRelativeImportExtensions`) so consumers load plain JavaScript from `node_modules`.
 - `@oxlint/plugins` is a caret dependency instead of an exact pin. At runtime it only provides the `defineRule` and `eslintCompatPlugin` helpers. `oxlint` is an optional peer.
 - Tests run through Vitest with Oxlint's `RuleTester` instead of a chained `tsx` script. Native CLI regressions and a compiled-package smoke test validate plugin loading and autofixes.
+- Local opt-in `no-silent-promise-catch` and `prefer-import-meta-main` policies encode recurring portfolio findings. The latter requires runtime-compatible consumer overrides; neither rule applies automatic fixes.
 
 ## Updating
 
