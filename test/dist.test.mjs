@@ -27,6 +27,7 @@ test("the compiled package loads and reports all probe violations", (t) => {
         "anti-slop/no-reflect-get": "error",
         "anti-slop/require-readable-spacing": "error",
         "anti-slop/no-unknown-parameters": "error",
+        "anti-slop/no-silent-promise-catch": "error",
       },
     }),
   );
@@ -35,6 +36,7 @@ test("the compiled package loads and reports all probe violations", (t) => {
     [
       "export const value = Reflect.get(globalThis, 'x');",
       "export function read(input: unknown) { return input; }",
+      "Promise.reject(new Error('save failed')).catch(() => undefined);",
       "",
     ].join("\n"),
   );
@@ -50,4 +52,5 @@ test("the compiled package loads and reports all probe violations", (t) => {
   assert.match(output, /anti-slop\(no-reflect-get\)/, output);
   assert.match(output, /anti-slop\(require-readable-spacing\)/, output);
   assert.match(output, /anti-slop\(no-unknown-parameters\)/, output);
+  assert.match(output, /anti-slop\(no-silent-promise-catch\)/, output);
 });
