@@ -5,24 +5,22 @@ The rule sources in `src/` are copied from [dmmulroy/anti-slop](https://github.c
 | Field           | Value                                                                                                      |
 | --------------- | ---------------------------------------------------------------------------------------------------------- |
 | Upstream commit | `13909c9e07590f5a85d93c62712259fe14a883f7` (2026-10-13)                                                    |
-| Copied          | `src/**` (generic rules, shared helpers, vendored ESLint Stylistic, RuleTester suites)                     |
+| Copied          | Generic rules, shared helpers, vendored ESLint Stylistic, and rule fixtures (now under `test/rules/`)      |
 | Not copied      | `src/effect/` (Effect rules), `skills/`, `scripts/sync-skill-assets.mjs`, the install skill's asset mirror |
 
 ## Local changes
 
 - The opt-in Effect plugin was dropped. Local formatting and parser-owned AST traversal helpers enforce the shared lint policy without changing rule diagnostics.
 - Runtime `typeof` exceptions are limited to rule-option parsing and ESTree literal discrimination, where representation checks are the boundary contract.
-- Compiled to `dist/` with `tsc` (`rewriteRelativeImportExtensions`) so consumers load plain JavaScript from `node_modules`.
-- `@oxlint/plugins` is a caret dependency instead of an exact pin. At runtime it only provides the `defineRule` and `eslintCompatPlugin` helpers. `oxlint` is an optional peer.
-- Tests run through Vitest with Oxlint's `RuleTester` instead of a chained `tsx` script. Native CLI regressions and a compiled-package smoke test validate plugin loading and autofixes.
+- Distributed as compiled JavaScript rather than vendored TypeScript; `oxlint` is an optional peer so ESLint consumers can also load the package.
+- Rule fixtures use Vitest with Oxlint's `RuleTester`; retain the native CLI and compiled-package checks when porting upstream changes.
 - Local opt-in `no-silent-promise-catch` and `prefer-import-meta-main` policies encode recurring portfolio findings. The latter requires runtime-compatible consumer overrides; neither rule applies automatic fixes.
 
 ## Updating
 
 ```bash
 git clone https://github.com/dmmulroy/anti-slop /tmp/anti-slop
-git -C /tmp/anti-slop diff <pinned-commit> HEAD -- src README.md
-pnpm check
+git -C /tmp/anti-slop diff 13909c9e07590f5a85d93c62712259fe14a883f7 HEAD -- src README.md
 ```
 
-Port the reviewed changes into `src/` and the matching Vitest suites under `test/rules/`, preserving the local changes above. Then run `pnpm check`, update the commit above, bump the version, and add any new rules to the README config.
+Port reviewed changes into `src/` and the matching suites under `test/rules/`, preserving the local adaptations above and the [vendored Stylistic adaptations](src/vendor/eslint-stylistic/UPSTREAM.md). Follow the [development checks](README.md#develop), update the pinned revision here, and update consumer configuration for new rules before [releasing](README.md#release).

@@ -2,7 +2,7 @@
 
 Opinionated [Oxlint](https://oxc.rs/docs/guide/usage/linter/js-plugins) rules that reject low-evidence TypeScript and JavaScript patterns, packaged for npm.
 
-This is a published fork of [dmmulroy/anti-slop](https://github.com/dmmulroy/anti-slop). Upstream is meant to be copied into each repository. This package compiles the same rules to JavaScript so every repo can install one versioned dependency. See [UPSTREAM.md](UPSTREAM.md) for the pinned upstream commit and the local changes. Rule documentation and examples live in the [upstream README](https://github.com/dmmulroy/anti-slop#rules).
+This fork packages the generic rules from [dmmulroy/anti-slop](https://github.com/dmmulroy/anti-slop) as a versioned JavaScript dependency. See [UPSTREAM.md](UPSTREAM.md) for provenance and upgrade guidance, and the [pinned upstream README](https://github.com/dmmulroy/anti-slop/blob/13909c9e07590f5a85d93c62712259fe14a883f7/README.md#rules) for inherited rule examples. Local policies are described below.
 
 ## Install
 
@@ -43,7 +43,8 @@ Requires `oxlint` 1.78 or newer and Node 22.18 or newer.
 }
 ```
 
-The same `jsPlugins` and `rules` go under `lint` in an `oxlint.config.ts` or a Vite+ config.
+Use the same top-level `jsPlugins` and `rules` in `oxlint.config.ts`; in a Vite+ config,
+place them under `lint`.
 
 `require-readable-spacing` keeps consecutive single-line bindings grouped at any scope, including exported bindings. A binding with its own leading comment starts a new group. Multiline bindings and control-flow boundaries receive blank lines; existing blank lines are preserved.
 
@@ -70,18 +71,9 @@ await reader.cancel().catch(() => {
 });
 ```
 
-The rule has no automatic fix: logging, recovery, propagation, and intentional suppression
-have different behavior. It inspects static method names, including computed string names
-and optional calls; it does not infer promise types, follow named callbacks, or prove that
-a comment's explanation is correct. A custom non-Promise API named `catch` or `then` follows
-the same callback policy when this rule is enabled. Shadowed `undefined` values and
-`void reportFailure()` are not mistaken for no-op handlers.
-
-Native `eslint/no-empty` checks catch statements and `eslint/no-empty-function` checks empty
-functions. Neither targets rejection callbacks returning `undefined`, while banning every
-empty callback also rejects unrelated listener stubs. This rule supplies that focused policy
-through the existing Oxlint AST and RuleTester APIs. See the
-[repeatable review workflow](docs/review-workflow.md) for adoption and evidence requirements.
+There is no automatic fix: recovery, propagation, and intentional suppression have different
+behavior. Detection is syntactic: it also applies to non-Promise APIs named `catch` or `then`,
+does not follow named callbacks, and cannot validate a comment's explanation.
 
 ### Native CLI entry points
 
@@ -116,25 +108,15 @@ if (import.meta.main) {
 }
 ```
 
-The rule reports equality and inequality comparisons in either order between:
+The rule detects direct URL or filename comparisons with `process.argv[1]`; it does not
+follow intermediate variables or custom path helpers, infer bundler behavior, or inspect
+`package.json` for runtime support. See the [fixtures](test/rules/prefer-import-meta-main.test.ts)
+for supported syntax.
 
-- `import.meta.url` and `pathToFileURL(process.argv[1]).href`;
-- `import.meta.filename` or `fileURLToPath(import.meta.url)` and `process.argv[1]`.
-
-It resolves named, aliased, default, and namespace imports from `node:url`/`url` and
-default/namespace imports from `node:process`/`process`. Static computed property names work;
-shadowed variables and imports from unrelated packages do not match. Detection stays local
-to the comparison: it does not follow intermediate variables, CommonJS imports, optional
-chains, TypeScript expression wrappers, or custom path-normalization helpers. It does not
-infer bundler behavior or inspect `package.json` to decide whether to enable itself.
-
-There is no automatic fix. Review inversion, surrounding argument guards, cleanup, and
-compatibility fallbacks before replacing a comparison; a comparison might intentionally
-test path equality rather than main-module identity. Preserve tests for direct, relative,
-symlink, directory, and encoded-path launches, inert imports, and CLI failures. Older-runtime
-compatibility modules should keep this rule disabled with their runtime constraint recorded.
-Native `unicorn/prefer-import-meta-properties` covers `dirname` and `filename`, not this
-entry-point policy; the custom rule uses the existing Oxlint AST and RuleTester APIs.
+There is no automatic fix. Review inversion, argument guards, cleanup, and compatibility
+fallbacks before changing a comparison: it might intentionally test path equality. Keep
+older-runtime compatibility modules excluded, and test launch paths (including symlinks),
+inert imports, and CLI failures in the consumer.
 
 ### ESLint
 
@@ -153,7 +135,18 @@ export default [
 ```bash
 pnpm install
 pnpm check   # lint, typecheck, Vitest/RuleTester suites, build, dist smoke test
+pnpm format:check
 ```
+
+For focused checks, `pnpm test` runs source fixtures and CLI cases. Run `pnpm build` before
+`pnpm test:dist`, which checks the compiled package through the real Oxlint CLI.
+
+Before adding a rule, check native Oxlint capabilities and the [roadmap's evidence gate](ROADMAP.md#ordered-releases).
+Add valid alternatives and false-positive cases through the existing RuleTester integration.
+Export public rules from `src/index.ts` and cover new exports in `test/dist.test.mjs`.
+Pilot a new policy alone in a consumer, classify diagnostics and justified exceptions, and
+run that consumer's checks before wider adoption. A source commit is available to installed
+consumers only after a package release.
 
 ## Release
 
@@ -162,7 +155,3 @@ Bump `version` in `package.json`, then create a GitHub release tagged `vX.Y.Z`. 
 ## License
 
 MIT. Original rules © Dillon Mulroy. The vendored ESLint Stylistic code keeps its own license in `src/vendor/eslint-stylistic/LICENSE`.
-
-Tests run through two [Vitest projects](https://vitest.dev/guide/projects.html). `pnpm test` and `pnpm test:watch` select the `unit` project for the RuleTester and source CLI cases. After `pnpm build`, run `pnpm test:dist` to select the `dist` project and check the compiled package through the real Oxlint CLI. `pnpm check` runs both in build order, as does CI.
-
-The compiled-package probe uses Vitest's assertions reporting and per-test cleanup instead of a standalone Node test script. It still requires exit status 1 and diagnostics for all configured probe rules; a missing build or a failed child process fails the test. This checks a packaging boundary that source-only rule tests cannot cover.
