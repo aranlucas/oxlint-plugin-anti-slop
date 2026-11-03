@@ -25,4 +25,4 @@ The opinionated policy lives in [`../../rules/require-readable-spacing.ts`](../.
 
 Fetch an explicit upstream revision, compare the original rule and types against this revision, and port relevant fixes while retaining the adapters above. Update this record, preserve the license, and run `pnpm check`.
 
-Focused [RuleTester fixtures](../../../test/rules/require-readable-spacing.test.ts) and a [native CLI regression](../../../test/rules/require-readable-spacing-cli.test.ts) cover fixes, comments, and repeated-fix stability. The complete upstream JS/TS suites have not been ported; these checks do not establish full upstream conformance.
+Focused [RuleTester fixtures](../../../test/rules/require-readable-spacing.test.ts) and a [native CLI regression](../../../test/rules/require-readable-spacing-cli.test.ts) cover fixes, comments, and repeated-fix stability. The unexposed upstream blank-line removal configuration is not tested. The complete upstream JS/TS suites have not been ported; these checks do not establish full upstream conformance.

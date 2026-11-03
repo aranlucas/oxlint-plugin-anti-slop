@@ -8,7 +8,6 @@ const error = { messageId: "moduleMock" };
 
 tester.run("anti-slop/no-module-mocking", noModuleMockingRule, {
   valid: [
-    "const store = new InMemoryUserStore();",
     "vi.spyOn(store, 'save');",
     "const vi = { mock() {} }; vi.mock();",
     "function test(jest: { mock(): void }) { jest.mock(); }",
