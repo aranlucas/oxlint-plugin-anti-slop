@@ -3,14 +3,6 @@
 Updated 2026-10-26. Proposed developer-facing work, not a package-release claim.
 Use owned `aranlucas`/`sidequest-labs` consumers for new portfolio adoption work.
 
-## Starting point
-
-At `bc71ca97b33b94e15579025702f121fdfee149c2`, the [package](README.md)
-contains the generic forked rules plus opt-in silent-promise-failure and native
-ESM-entry-point policies. Source RuleTester cases, compiled CLI probes and a
-[repeatable review workflow](docs/review-workflow.md) already exist. They provide
-the foundation for useful detection; more rules are not inherently more value.
-
 ## Ordered releases
 
 1. **Turn a diagnostic into a correct next action.** Improve existing rule
@@ -45,5 +37,4 @@ fixtures in the existing Vitest/RuleTester suites, not copies of private code.
 Promote defaults only after reviewing the results with the consuming policy.
 
 Oxforge owns shared preset selection; this package owns narrowly testable AST
-detection; each product owns behavior and its integration tests. Keep native
-commands and current test runners as the repeatable execution path.
+detection; each product owns behavior and its integration tests.
