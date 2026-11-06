@@ -462,7 +462,7 @@ function isBroadMappedKey(
 
   const nextVisited = new Set([...visitedAliases, alias]);
 
-  return isBroadMappedKey(alias.typeAnnotation, environment, substitutions, nextVisited);
+  return isBroadMappedKey(alias.typeAnnotation, environment, new Map(), nextVisited);
 }
 
 function classifyAliasBroadTarget(

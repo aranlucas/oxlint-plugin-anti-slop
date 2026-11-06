@@ -40,6 +40,10 @@ tester.run("anti-slop/no-known-value-widening", noKnownValueWideningRule, {
     "function isString(value: unknown): value is string { return true; } declare function readInput(): unknown; isString(readInput());",
   ],
   invalid: [
+    {
+      code: "type K = string; type Key = K; type Dict<K> = Record<Key, number>; const value: Dict<'id'> = { id: 1 };",
+      errors: [{ messageId: "widening" }],
+    },
     { code: "const value: unknown = {};", errors: [error] },
     { code: "const value: object = {};", errors: [error] },
     { code: "let value: unknown; value = {};", errors: [error] },

@@ -193,7 +193,13 @@ export function visibleTypeInterfaces(
     return [];
   }
 
-  return nearestTypeBindings(name, use, environment).flatMap((binding) =>
+  const bindings = nearestTypeBindings(name, use, environment);
+
+  if (bindings.some((binding) => binding.interfaceDeclaration === undefined)) {
+    return [];
+  }
+
+  return bindings.flatMap((binding) =>
     binding.interfaceDeclaration === undefined ? [] : [binding.interfaceDeclaration],
   );
 }

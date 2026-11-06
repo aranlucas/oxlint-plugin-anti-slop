@@ -8,6 +8,7 @@ const error = { messageId: "unsafeDictionary" };
 
 tester.run("anti-slop/no-unsafe-dictionary-type", noUnsafeDictionaryTypeRule, {
   valid: [
+    "class Value { id = 'x' } interface Value {} type A = Record<string, Value>;",
     "interface Value {} function f() { type Value = { id: string }; type A = Record<string, Value>; }",
     "interface Value {} function f<Value>() { type A = Record<string, Value>; }",
     "type Identity<T> = T; type Outer<T> = Identity<Readonly<T>>; type A = Record<string, Outer<{ id: string }>>;",

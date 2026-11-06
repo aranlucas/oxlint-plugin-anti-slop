@@ -82,3 +82,11 @@ the shared scope helper accepted only identifier references although array analy
 also passes parameter bindings, and conditional property spread violated lint.
 Broaden the helper to Oxlint's identifier node union and return interface bindings
 explicitly. No baseline failures or local test execution were involved.
+
+The final reviewer found one remaining alias-entry path in broad dictionary keys:
+non-generic key aliases still received caller substitutions. Clear that map on
+entry (there are no parameters), retaining the cycle path; a widening fixture
+checks that a module key alias stays broad inside a same-named generic context.
+Interface emptiness evidence now also requires all nearest bindings to be
+interfaces, preserving valid class/interface merging; a concrete owner fixture
+protects that conservative boundary.
