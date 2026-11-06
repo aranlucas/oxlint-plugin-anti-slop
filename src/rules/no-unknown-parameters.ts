@@ -1,5 +1,6 @@
 import { defineRule } from "@oxlint/plugins";
-import type { ESTree } from "@oxlint/plugins";
+
+import { functionContractVisitors, type FunctionContract } from "../shared/function-contracts.ts";
 
 import {
   containsUnknownType,
@@ -7,16 +8,7 @@ import {
   functionParameterTypeAnnotation,
 } from "../shared/function-parameters.ts";
 
-type ParameterOwner =
-  | ESTree.ArrowFunctionExpression
-  | ESTree.Function
-  | ESTree.TSCallSignatureDeclaration
-  | ESTree.TSConstructSignatureDeclaration
-  | ESTree.TSConstructorType
-  | ESTree.TSFunctionType
-  | ESTree.TSMethodSignature;
-
-function isTypePredicateSubject(owner: ParameterOwner, parameterName: string): boolean {
+function isTypePredicateSubject(owner: FunctionContract, parameterName: string): boolean {
   const predicate = owner.returnType?.typeAnnotation;
 
   return (
@@ -26,7 +18,6 @@ function isTypePredicateSubject(owner: ParameterOwner, parameterName: string): b
   );
 }
 
-/** Disallow unknown inputs except explicitly named error-cause enrichment. */
 export const noUnknownParametersRule = defineRule({
   meta: {
     type: "problem",
@@ -40,7 +31,7 @@ export const noUnknownParametersRule = defineRule({
     },
   },
   createOnce(context) {
-    const checkParameters = (node: ParameterOwner) => {
+    const checkParameters = (node: FunctionContract) => {
       for (const parameter of node.params) {
         const annotation = functionParameterTypeAnnotation(parameter);
 
@@ -67,16 +58,7 @@ export const noUnknownParametersRule = defineRule({
     };
 
     return {
-      ArrowFunctionExpression: checkParameters,
-      FunctionDeclaration: checkParameters,
-      FunctionExpression: checkParameters,
-      TSCallSignatureDeclaration: checkParameters,
-      TSConstructSignatureDeclaration: checkParameters,
-      TSConstructorType: checkParameters,
-      TSDeclareFunction: checkParameters,
-      TSEmptyBodyFunctionExpression: checkParameters,
-      TSFunctionType: checkParameters,
-      TSMethodSignature: checkParameters,
+      ...functionContractVisitors(checkParameters),
     };
   },
 });

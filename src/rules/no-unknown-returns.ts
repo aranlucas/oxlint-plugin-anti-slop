@@ -1,23 +1,16 @@
 import { defineRule } from "@oxlint/plugins";
 
+import { functionContractVisitors, type FunctionContract } from "../shared/function-contracts.ts";
+
 import type { ESTree } from "@oxlint/plugins";
 
 import {
   createTypeAliasEnvironment,
+  hasVisibleTypeBinding,
   resolvedTypeMatches,
   type TypeAliasEnvironment,
 } from "../shared/type-alias-resolution.ts";
 
-type FunctionWithReturnType =
-  | ESTree.ArrowFunctionExpression
-  | ESTree.Function
-  | ESTree.TSCallSignatureDeclaration
-  | ESTree.TSConstructSignatureDeclaration
-  | ESTree.TSConstructorType
-  | ESTree.TSFunctionType
-  | ESTree.TSMethodSignature;
-
-/** Ban function contracts that return unknown instead of a parsed domain type. */
 export const noUnknownReturnsRule = defineRule({
   meta: {
     type: "problem",
@@ -56,12 +49,19 @@ export const noUnknownReturnsRule = defineRule({
           return false;
         }
 
+        if (
+          environment !== null &&
+          hasVisibleTypeBinding(resolved.typeName.name, resolved, environment)
+        ) {
+          return false;
+        }
+
         const value = resolved.typeArguments?.params[0];
 
         return value !== undefined && matches(value);
       });
 
-    const checkReturnType = (node: FunctionWithReturnType) => {
+    const checkReturnType = (node: FunctionContract) => {
       const annotation = node.returnType;
 
       if (annotation === null || annotation === undefined) {
@@ -79,16 +79,7 @@ export const noUnknownReturnsRule = defineRule({
       Program(node) {
         environment = createTypeAliasEnvironment(node, context.sourceCode.visitorKeys);
       },
-      ArrowFunctionExpression: checkReturnType,
-      FunctionDeclaration: checkReturnType,
-      FunctionExpression: checkReturnType,
-      TSCallSignatureDeclaration: checkReturnType,
-      TSConstructSignatureDeclaration: checkReturnType,
-      TSConstructorType: checkReturnType,
-      TSDeclareFunction: checkReturnType,
-      TSEmptyBodyFunctionExpression: checkReturnType,
-      TSFunctionType: checkReturnType,
-      TSMethodSignature: checkReturnType,
+      ...functionContractVisitors(checkReturnType),
     };
   },
 });

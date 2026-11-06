@@ -1,11 +1,14 @@
 import { defineRule } from "@oxlint/plugins";
 
 import {
+  createTypeAliasEnvironment,
+  type TypeAliasEnvironment,
+} from "../shared/type-alias-resolution.ts";
+
+import {
   classifyUnsafeDictionaryValue,
   classifyWideningTarget,
-  createTypeEnvironment,
   isKnownEvidenceExpression,
-  type TypeEnvironment,
   type WideningTarget,
 } from "../shared/dictionary-types.ts";
 import {
@@ -179,14 +182,14 @@ function variableTypeAnnotation(
   return parameter === undefined ? null : (functionParameterTypeAnnotation(parameter) ?? null);
 }
 
-function hasInformativeType(type: ESTree.TSType, environment: TypeEnvironment): boolean {
+function hasInformativeType(type: ESTree.TSType, environment: TypeAliasEnvironment): boolean {
   return classifyUnsafeDictionaryValue(type, environment) === null;
 }
 
 function hasKnownCallArgumentEvidence(
   sourceCode: SourceCode,
   expression: ESTree.Expression,
-  environment: TypeEnvironment,
+  environment: TypeAliasEnvironment,
   visitedVariables = new Set<Variable>(),
 ): boolean {
   if (expression.type === "ParenthesizedExpression" || expression.type === "TSNonNullExpression") {
@@ -271,7 +274,7 @@ function typePredicateSubjectIndex(
 function annotationTarget(
   annotation: ESTree.TSTypeAnnotation | null | undefined,
 
-  environment: TypeEnvironment,
+  environment: TypeAliasEnvironment,
 ): WideningTarget | null {
   return annotation === null || annotation === undefined
     ? null
@@ -344,7 +347,6 @@ function hasParentAssertion(node: ESTree.Node): boolean {
   return node.parent?.type === "TSAsExpression" || node.parent?.type === "TSTypeAssertion";
 }
 
-/** Detect sound syntactic cases where a known value is explicitly widened and loses evidence. */
 export const noKnownValueWideningRule = defineRule({
   meta: {
     type: "problem",
@@ -358,7 +360,7 @@ export const noKnownValueWideningRule = defineRule({
     },
   },
   createOnce(context) {
-    let environment: TypeEnvironment | null = null;
+    let environment: TypeAliasEnvironment | null = null;
 
     const reportFlow = (
       expression: ESTree.Expression,
@@ -389,7 +391,7 @@ export const noKnownValueWideningRule = defineRule({
 
     return {
       Program(node) {
-        environment = createTypeEnvironment(node, context.sourceCode.visitorKeys);
+        environment = createTypeAliasEnvironment(node, context.sourceCode.visitorKeys);
       },
       VariableDeclarator(node) {
         if (node.init === null || node.id.type !== "Identifier") {
