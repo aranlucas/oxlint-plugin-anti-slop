@@ -1,5 +1,7 @@
 import type { ESTree, SourceCode, Variable } from "@oxlint/plugins";
 
+import { createTypeAliasEnvironment, hasVisibleTypeBinding } from "./type-alias-resolution.ts";
+
 import { resolveVariable } from "./scope.ts";
 
 type ArrayMethodTarget = { readonly name: string; readonly object: ESTree.Node };
@@ -49,23 +51,35 @@ export function arrayMethodTarget(node: ESTree.Node): ArrayMethodTarget | null {
   return null;
 }
 
-function isArrayAnnotation(type: ESTree.TSType): boolean {
+function isArrayAnnotation(sourceCode: SourceCode, type: ESTree.TSType): boolean {
   if (type.type === "TSArrayType" || type.type === "TSTupleType") {
     return true;
   }
 
   if (type.type === "TSParenthesizedType") {
-    return isArrayAnnotation(type.typeAnnotation);
+    return isArrayAnnotation(sourceCode, type.typeAnnotation);
   }
 
   if (type.type === "TSTypeOperator" && type.operator === "readonly") {
-    return isArrayAnnotation(type.typeAnnotation);
+    return isArrayAnnotation(sourceCode, type.typeAnnotation);
+  }
+
+  let root: ESTree.Node = type;
+
+  while (root.parent !== null) {
+    root = root.parent;
   }
 
   return (
+    root.type === "Program" &&
     type.type === "TSTypeReference" &&
     type.typeName.type === "Identifier" &&
-    (type.typeName.name === "Array" || type.typeName.name === "ReadonlyArray")
+    (type.typeName.name === "Array" || type.typeName.name === "ReadonlyArray") &&
+    !hasVisibleTypeBinding(
+      type.typeName.name,
+      type,
+      createTypeAliasEnvironment(root, sourceCode.visitorKeys),
+    )
   );
 }
 
@@ -120,7 +134,7 @@ export function isKnownArrayExpression(
     const annotation = identifier.typeAnnotation?.typeAnnotation;
 
     if (annotation !== undefined) {
-      return isArrayAnnotation(annotation);
+      return isArrayAnnotation(sourceCode, annotation);
     }
   }
 
