@@ -87,3 +87,15 @@ reported unwanted diagnostics. The workflow then failed on an unsupported Jest
 report field (`numRuntimeErrorTestSuites`, absent in Vitest). Validate the actual
 Vitest test totals and require assertion failures rather than infrastructure
 errors. Full fixed-source CI remains pending.
+
+### Fixed-source CI and review outcome
+
+[CI run 42304705377](https://github.com/aranlucas/oxlint-plugin-anti-slop/actions/runs/42304705377)
+passed on `af01cb3`: baseline reproduction gate, lint, typecheck, all 539 tests
+(including all nine new scope fixtures), package build, compiled-package dist
+probe, and the real `e2e@0.23.0` CLI reject/repair/accept journey. Independent
+review found no remaining substantive findings; GitHub has no outstanding review
+requirements or comments. Logs revealed upload-artifact excluded hidden `.e2e`
+files by default; explicitly include them in the narrowly scoped evidence upload.
+The portfolio status record tracks the final head/CI/merge outcome. No local tests
+or builds, credential changes, deployments or production writes occurred.
