@@ -14,6 +14,14 @@ tester.run("anti-slop/no-unknown-type-aliases", noUnknownTypeAliasesRule, {
     "type Box<T> = { readonly value: T }; type Payload = Box<unknown>;",
   ],
   invalid: [
+    {
+      code: "type Identity<T> = T; type A = Identity<Identity<unknown>>;",
+      errors: [error],
+    },
+    {
+      code: "type T = unknown; type Inner<U> = T; type Outer<T> = Inner<T>; type A = Outer<string>;",
+      errors: [error, error, error, error],
+    },
     { code: "type Alias = unknown;", errors: [error] },
     { code: "type UnknownValue = unknown; type Alias = UnknownValue;", errors: [error, error] },
     { code: "type Payload = string | unknown;", errors: [error] },

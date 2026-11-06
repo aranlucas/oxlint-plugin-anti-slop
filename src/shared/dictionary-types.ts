@@ -168,7 +168,7 @@ function unsafeDirectValue(
       substitution.type,
       environment,
       substitution.substitutions,
-      resolvingAliases,
+      substitution.resolvingAliases,
     );
   }
 
@@ -184,7 +184,7 @@ function unsafeDirectValue(
     return null;
   }
 
-  const nextSubstitutions = aliasSubstitutions(alias, unwrapped, substitutions);
+  const nextSubstitutions = aliasSubstitutions(alias, unwrapped, substitutions, resolvingAliases);
 
   if (nextSubstitutions === null) {
     return null;
@@ -234,7 +234,7 @@ function dictionaryValueTypes(
       substitution.type,
       environment,
       substitution.substitutions,
-      resolvingAliases,
+      substitution.resolvingAliases,
     );
   }
 
@@ -266,7 +266,7 @@ function dictionaryValueTypes(
     return [];
   }
 
-  const nextSubstitutions = aliasSubstitutions(alias, unwrapped, substitutions);
+  const nextSubstitutions = aliasSubstitutions(alias, unwrapped, substitutions, resolvingAliases);
 
   if (nextSubstitutions === null) {
     return [];
@@ -362,7 +362,7 @@ export function classifyWideningTarget(
   }
 
   if ((alias.typeParameters?.params.length ?? 0) > 0) {
-    const substitutions = aliasSubstitutions(alias, unwrapped, new Map());
+    const substitutions = aliasSubstitutions(alias, unwrapped, new Map(), new Set());
 
     const resolved =
       substitutions === null
@@ -377,7 +377,7 @@ export function classifyWideningTarget(
     return resolved?.kind === "open dictionary" ? { kind: "generic container" } : null;
   }
 
-  const substitutions = aliasSubstitutions(alias, unwrapped, new Map());
+  const substitutions = aliasSubstitutions(alias, unwrapped, new Map(), new Set());
 
   if (substitutions === null) {
     return null;
@@ -442,7 +442,7 @@ function isBroadMappedKey(
       substitution.type,
       environment,
       substitution.substitutions,
-      visitedAliases,
+      substitution.resolvingAliases,
     );
   }
 
@@ -510,7 +510,7 @@ function classifyAliasBroadTarget(
       substitution.type,
       environment,
       substitution.substitutions,
-      resolvingAliases,
+      substitution.resolvingAliases,
     );
   }
 
@@ -534,7 +534,7 @@ function classifyAliasBroadTarget(
     return null;
   }
 
-  const nextSubstitutions = aliasSubstitutions(alias, unwrapped, substitutions);
+  const nextSubstitutions = aliasSubstitutions(alias, unwrapped, substitutions, resolvingAliases);
 
   if (nextSubstitutions === null) {
     return null;

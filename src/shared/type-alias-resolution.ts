@@ -16,6 +16,7 @@ type TypeBinding = {
 };
 
 type Substitution = {
+  readonly resolvingAliases: ReadonlySet<ESTree.TSTypeAliasDeclaration>;
   readonly substitutions: Substitutions;
   readonly type: ESTree.TSType;
 };
@@ -219,10 +220,11 @@ export function aliasSubstitutions(
   alias: ESTree.TSTypeAliasDeclaration,
   reference: ESTree.TSTypeReference,
   base: Substitutions,
+  resolvingAliases: ReadonlySet<ESTree.TSTypeAliasDeclaration>,
 ): Substitutions | null {
   const parameters = alias.typeParameters?.params ?? [];
   const typeArguments = reference.typeArguments?.params ?? [];
-  const next = new Map(base);
+  const next = new Map<string, Substitution>();
 
   for (const [index, parameter] of parameters.entries()) {
     const explicitArgument = typeArguments[index];
@@ -235,6 +237,9 @@ export function aliasSubstitutions(
     const argumentSubstitutions = explicitArgument === undefined ? next : base;
     next.set(parameter.name.name, {
       type: argument,
+      resolvingAliases: explicitArgument === undefined
+        ? new Set([...resolvingAliases, alias])
+        : resolvingAliases,
       substitutions: new Map(argumentSubstitutions),
     });
   }
@@ -259,13 +264,13 @@ export function resolvedTypeMatches(
         const substitution = substitutions.get(name);
 
         if (substitution !== undefined && !current.typeArguments?.params.length) {
-          return evaluate(substitution.type, substitution.substitutions, resolvingAliases);
+          return evaluate(substitution.type, substitution.substitutions, substitution.resolvingAliases);
         }
 
         const alias = visibleTypeAlias(name, current, environment);
 
         if (alias !== null && !resolvingAliases.has(alias)) {
-          const nextSubstitutions = aliasSubstitutions(alias, current, substitutions);
+          const nextSubstitutions = aliasSubstitutions(alias, current, substitutions, resolvingAliases);
 
           if (nextSubstitutions !== null) {
             const nextResolving = new Set([...resolvingAliases, alias]);

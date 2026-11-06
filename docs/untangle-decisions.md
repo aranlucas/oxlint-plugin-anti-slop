@@ -68,3 +68,11 @@ use the existing type-alias environment directly instead of preserving a wrapper
 The return rule must also check lexical bindings before treating `Promise` and
 `PromiseLike` as built-ins. New fixtures cover those behaviors, not helper internals.
 No existing test was removed: the reviewer found the remaining fixtures meaningful.
+
+The second review found two further resolver issues in the shared mechanism:
+caller generics leaked into free names of callee alias bodies, and recursion
+markers incorrectly suppressed finite nested instantiations such as
+`Identity<Identity<unknown>>`. Callee maps now contain only their own parameters;
+argument substitutions carry the caller's expansion path as well as its binding
+map. Defaults capture preceding callee parameters. Regression fixtures distinguish
+finite nesting and lexical free names from true cycles.

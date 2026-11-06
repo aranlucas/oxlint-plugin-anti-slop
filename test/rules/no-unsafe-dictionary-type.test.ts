@@ -41,6 +41,14 @@ tester.run("anti-slop/no-unsafe-dictionary-type", noUnsafeDictionaryTypeRule, {
   ],
   invalid: [
     {
+      code: "type Identity<T> = T; type A = Record<string, Identity<Identity<unknown>>>;",
+      errors: [error],
+    },
+    {
+      code: "type T = unknown; type Inner<U> = T; type Outer<T> = Inner<T>; type A = Record<string, Outer<string>>;",
+      errors: [error],
+    },
+    {
       code: "function f() { interface Value {} type A = Record<string, Value>; }",
       errors: [error],
     },
