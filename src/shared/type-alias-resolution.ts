@@ -66,19 +66,16 @@ function declaredTypeBinding(node: ESTree.Node): DeclaredTypeBinding | null {
     return { alias: node, name: node.id.name };
   }
 
+  if (node.type === "TSInterfaceDeclaration") {
+    return { alias: null, name: node.id.name, interfaceDeclaration: node };
+  }
+
   if (
-    node.type === "TSInterfaceDeclaration" ||
     node.type === "TSEnumDeclaration" ||
     node.type === "ClassDeclaration" ||
     node.type === "ClassExpression"
   ) {
-    return node.id === null
-      ? null
-      : {
-          alias: null,
-          name: node.id.name,
-          ...(node.type === "TSInterfaceDeclaration" ? { interfaceDeclaration: node } : {}),
-        };
+    return node.id === null ? null : { alias: null, name: node.id.name };
   }
 
   if (

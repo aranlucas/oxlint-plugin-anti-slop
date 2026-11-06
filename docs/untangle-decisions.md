@@ -76,3 +76,9 @@ markers incorrectly suppressed finite nested instantiations such as
 argument substitutions carry the caller's expansion path as well as its binding
 map. Defaults capture preceding callee parameters. Regression fixtures distinguish
 finite nesting and lexical free names from true cycles.
+
+Initial PR CI ran source fixtures successfully and found introduced static issues:
+the shared scope helper accepted only identifier references although array analysis
+also passes parameter bindings, and conditional property spread violated lint.
+Broaden the helper to Oxlint's identifier node union and return interface bindings
+explicitly. No baseline failures or local test execution were involved.
