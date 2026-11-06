@@ -76,3 +76,14 @@ Keep JSON failure evidence as CI artifacts. No local tests/builds executed.
 Independent implementation review and CI evidence pending.
 
 Independent review confirmed all three fixes and regression assertions; the config uses the published `tests` glob option. Static lint and typecheck passed locally. No local tests or builds ran.
+
+### CI baseline evidence
+
+Run [42304327641](https://github.com/aranlucas/oxlint-plugin-anti-slop/actions/runs/42304327641)
+reproduced exactly five expected behavior failures and four passing controls on
+pre-audit sources. Downloaded and inspected the JSON artifact: both class cases
+missed their diagnostic; two shadowed array cases and the mapped binder case
+reported unwanted diagnostics. The workflow then failed on an unsupported Jest
+report field (`numRuntimeErrorTestSuites`, absent in Vitest). Validate the actual
+Vitest test totals and require assertion failures rather than infrastructure
+errors. Full fixed-source CI remains pending.

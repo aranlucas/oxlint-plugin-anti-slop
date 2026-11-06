@@ -43,7 +43,7 @@ jobs:
           status=0
           pnpm exec vitest run --project unit test/rules/reliability-scope.test.ts --reporter=json --outputFile=reliability-baseline.json || status=$?
           test "$status" -eq 1
-          node --input-type=module -e 'import fs from "node:fs"; import assert from "node:assert/strict"; const r=JSON.parse(fs.readFileSync("reliability-baseline.json","utf8")); assert.equal(r.numFailedTests,5); assert.equal(r.numPassedTests,4); assert.equal(r.numRuntimeErrorTestSuites,0);'
+          node --input-type=module -e 'import fs from "node:fs"; import assert from "node:assert/strict"; const r=JSON.parse(fs.readFileSync("reliability-baseline.json","utf8")); assert.equal(r.numFailedTests,5); assert.equal(r.numPassedTests,4); assert.equal(r.numTotalTests,9); const cases=r.testResults.flatMap(s=>s.assertionResults); assert.equal(cases.length,9); const failures=cases.filter(t=>t.status === "failed"); assert.equal(failures.length,5); for (const t of failures) assert.ok(t.failureMessages.some(m=>m.startsWith("AssertionError [ERR_ASSERTION]: Should have")),t.fullName);'
 
       - parallel:
           - name: Lint
