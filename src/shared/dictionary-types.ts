@@ -212,9 +212,12 @@ function dictionaryValueTypes(
   }
 
   if (unwrapped.type === "TSMappedType") {
+    const valueSubstitutions = new Map(substitutions);
+    valueSubstitutions.delete(unwrapped.key.name);
+
     return unwrapped.typeAnnotation === null
       ? []
-      : [{ type: unwrapped.typeAnnotation, substitutions }];
+      : [{ type: unwrapped.typeAnnotation, substitutions: valueSubstitutions }];
   }
 
   if (unwrapped.type !== "TSTypeReference") {

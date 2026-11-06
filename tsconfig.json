@@ -16,5 +16,12 @@
       "@test/*": ["./test/*"]
     }
   },
-  "include": ["src/**/*.ts", "test/**/*.ts", "vitest.config.ts", "test/**/*.mjs"]
+  "include": [
+    "src/**/*.ts",
+    "test/**/*.ts",
+    "vitest.config.ts",
+    "test/**/*.mjs",
+    "e2e/**/*.ts",
+    "e2e.config.ts"
+  ]
 }

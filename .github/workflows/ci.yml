@@ -25,12 +25,25 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          fetch-depth: 0
 
       - name: Set up pnpm, Node.js, and dependencies
         uses: pnpm/setup@fa36a5ef7dcdefc3a7cb25655c122e00cf6e636e # v3.1.2
         with:
           cache: true
           require-lockfile: true
+
+      - name: Demonstrate regressions against pre-audit source
+        run: |
+          files=(src/shared/type-alias-resolution.ts src/shared/array-method.ts src/shared/dictionary-types.ts)
+          trap 'git restore -- "${files[@]}"' EXIT
+          for file in "${files[@]}"; do
+            git show 5d21ab133c77c8fcae0e9a072b03ba31ca24f960:"$file" > "$file"
+          done
+          status=0
+          pnpm exec vitest run --project unit test/rules/reliability-scope.test.ts --reporter=json --outputFile=reliability-baseline.json || status=$?
+          test "$status" -eq 1
+          node --input-type=module -e 'import fs from "node:fs"; import assert from "node:assert/strict"; const r=JSON.parse(fs.readFileSync("reliability-baseline.json","utf8")); assert.equal(r.numFailedTests,5); assert.equal(r.numPassedTests,4); assert.equal(r.numTotalTests,9); const cases=r.testResults.flatMap(s=>s.assertionResults); assert.equal(cases.length,9); const failures=cases.filter(t=>t.status === "failed"); assert.equal(failures.length,5); for (const t of failures) assert.ok(t.failureMessages.some(m=>m.startsWith("AssertionError [ERR_ASSERTION]: Should have")),t.fullName);'
 
       - parallel:
           - name: Lint
@@ -43,7 +56,20 @@ jobs:
             run: pnpm test
 
           - name: Build and smoke-test dist
-            run: pnpm build && pnpm test:dist
+            run: pnpm build && pnpm test:dist && pnpm test:e2e
+            env:
+              E2E_TELEMETRY_DISABLED: "1"
+
+      - name: Upload regression and e2e evidence
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: reliability-evidence
+          include-hidden-files: true
+          path: |
+            reliability-baseline.json
+            .e2e
+          retention-days: 7
 
       - name: Check patch hygiene
         run: git diff --check

@@ -98,7 +98,10 @@ function collectTypeBindings(
 
   if (declared !== null) {
     const bindings = bindingsByName.get(declared.name) ?? [];
-    bindings.push({ ...declared, scope: enclosingTypeScope(node) });
+    bindings.push({
+      ...declared,
+      scope: node.type === "ClassExpression" ? node : enclosingTypeScope(node),
+    });
     bindingsByName.set(declared.name, bindings);
   }
 
@@ -240,9 +243,8 @@ export function aliasSubstitutions(
     const argumentSubstitutions = explicitArgument === undefined ? next : base;
     next.set(parameter.name.name, {
       type: argument,
-      resolvingAliases: explicitArgument === undefined
-        ? new Set([...resolvingAliases, alias])
-        : resolvingAliases,
+      resolvingAliases:
+        explicitArgument === undefined ? new Set([...resolvingAliases, alias]) : resolvingAliases,
       substitutions: new Map(argumentSubstitutions),
     });
   }
@@ -267,13 +269,22 @@ export function resolvedTypeMatches(
         const substitution = substitutions.get(name);
 
         if (substitution !== undefined && !current.typeArguments?.params.length) {
-          return evaluate(substitution.type, substitution.substitutions, substitution.resolvingAliases);
+          return evaluate(
+            substitution.type,
+            substitution.substitutions,
+            substitution.resolvingAliases,
+          );
         }
 
         const alias = visibleTypeAlias(name, current, environment);
 
         if (alias !== null && !resolvingAliases.has(alias)) {
-          const nextSubstitutions = aliasSubstitutions(alias, current, substitutions, resolvingAliases);
+          const nextSubstitutions = aliasSubstitutions(
+            alias,
+            current,
+            substitutions,
+            resolvingAliases,
+          );
 
           if (nextSubstitutions !== null) {
             const nextResolving = new Set([...resolvingAliases, alias]);
