@@ -90,3 +90,8 @@ checks that a module key alias stays broad inside a same-named generic context.
 Interface emptiness evidence now also requires all nearest bindings to be
 interfaces, preserving valid class/interface merging; a concrete owner fixture
 protects that conservative boundary.
+
+CI on `7956a6e` passed source fixtures, typecheck, build and dist smoke tests.
+Its sole failure was the preset's inline-object-type policy on the widened helper
+parameter; give the identifier discriminator a module-level name. Validation
+remains CI-only.

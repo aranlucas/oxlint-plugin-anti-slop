@@ -1,8 +1,10 @@
 import type { ESTree, Scope, SourceCode, Variable } from "@oxlint/plugins";
 
+type IdentifierKind = { readonly type: "Identifier" };
+
 export function resolveVariable(
   sourceCode: SourceCode,
-  identifier: Extract<ESTree.Node, { type: "Identifier" }>,
+  identifier: Extract<ESTree.Node, IdentifierKind>,
 ): Variable | null {
   let scope: Scope | null = sourceCode.getScope(identifier);
 
