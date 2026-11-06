@@ -21,7 +21,7 @@ const test = base.extend<Fixtures>({
   },
 });
 
-test("compiled plugin reports lexical violations and accepts repaired source", async ({
+test("compiled plugin reports lexical violations and accepts repaired source", ({
   workspace,
 }) => {
   const config = join(workspace.root, "oxlint.json");
