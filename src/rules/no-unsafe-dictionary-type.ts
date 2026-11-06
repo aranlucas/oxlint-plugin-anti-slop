@@ -3,10 +3,12 @@ import { defineRule } from "@oxlint/plugins";
 import {
   classifyUnsafeDictionary,
   classifyUnsafeDictionaryValue,
-  createTypeEnvironment,
-  type TypeEnvironment,
 } from "../shared/dictionary-types.ts";
-import { visibleTypeAlias } from "../shared/type-alias-resolution.ts";
+import {
+  createTypeAliasEnvironment,
+  type TypeAliasEnvironment,
+  visibleTypeAlias,
+} from "../shared/type-alias-resolution.ts";
 
 import type { ESTree } from "@oxlint/plugins";
 
@@ -72,7 +74,7 @@ function isInsideTypeAliasDeclaration(node: ESTree.Node): boolean {
   return false;
 }
 
-function isPlainAliasConsumerUse(node: ESTree.TSType, environment: TypeEnvironment): boolean {
+function isPlainAliasConsumerUse(node: ESTree.TSType, environment: TypeAliasEnvironment): boolean {
   if (node.type !== "TSTypeReference" || node.typeArguments?.params.length) {
     return false;
   }
@@ -81,7 +83,7 @@ function isPlainAliasConsumerUse(node: ESTree.TSType, environment: TypeEnvironme
 
   return (
     name !== null &&
-    visibleTypeAlias(name, node, environment.typeAliases) !== null &&
+    visibleTypeAlias(name, node, environment) !== null &&
     !isInsideTypeAliasDeclaration(node)
   );
 }
@@ -102,7 +104,7 @@ function isInsideTypeParameterConstraint(node: ESTree.TSType): boolean {
   return false;
 }
 
-function shouldReportType(node: ESTree.TSType, environment: TypeEnvironment): boolean {
+function shouldReportType(node: ESTree.TSType, environment: TypeAliasEnvironment): boolean {
   if (isInsideTypeParameterConstraint(node)) {
     return false;
   }
@@ -128,7 +130,6 @@ function shouldReportType(node: ESTree.TSType, environment: TypeEnvironment): bo
   return true;
 }
 
-/** Disallow object-dictionary contracts whose direct value type is an unsafe escape hatch. */
 export const noUnsafeDictionaryTypeRule = defineRule({
   meta: {
     type: "problem",
@@ -142,7 +143,7 @@ export const noUnsafeDictionaryTypeRule = defineRule({
     },
   },
   createOnce(context) {
-    let environment: TypeEnvironment | null = null;
+    let environment: TypeAliasEnvironment | null = null;
 
     const report = (node: ESTree.Node, value: string) => {
       context.report({ node, messageId: "unsafeDictionary", data: { value } });
@@ -164,7 +165,7 @@ export const noUnsafeDictionaryTypeRule = defineRule({
 
     return {
       Program(node) {
-        environment = createTypeEnvironment(node, context.sourceCode.visitorKeys);
+        environment = createTypeAliasEnvironment(node, context.sourceCode.visitorKeys);
       },
 
       TSTypeReference: reportIfUnsafe,

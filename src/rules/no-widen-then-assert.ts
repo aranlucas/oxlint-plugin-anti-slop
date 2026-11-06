@@ -1,18 +1,13 @@
 import { defineRule } from "@oxlint/plugins";
-import type { ESTree, Variable } from "@oxlint/plugins";
+import type { ESTree, SourceCode, Variable } from "@oxlint/plugins";
+
+import { resolveVariable } from "../shared/scope.ts";
 
 type BroadTypeKind = "top" | "object" | "record";
 
 type KnownValueEvidence = {
   readonly type: ESTree.TSType | null;
 };
-
-type ScopeReference = {
-  readonly identifier: ESTree.Node;
-  readonly resolved: Variable | null;
-};
-
-type ScopeReferences = readonly { readonly references: readonly ScopeReference[] }[];
 
 type WidenedBinding = {
   readonly broadKind: BroadTypeKind;
@@ -257,25 +252,6 @@ function functionBoundary(node: ESTree.Node): ESTree.Node | null {
   return null;
 }
 
-function resolvedVariableForIdentifier(
-  scopes: ScopeReferences,
-  identifier: ESTree.IdentifierReference,
-): Variable | null {
-  for (const scope of scopes) {
-    const reference = scope.references.find(
-      (candidate) =>
-        candidate.identifier.start === identifier.start &&
-        candidate.identifier.end === identifier.end,
-    );
-
-    if (reference !== undefined) {
-      return reference.resolved;
-    }
-  }
-
-  return null;
-}
-
 function variableDeclarator(variable: Variable): ESTree.VariableDeclarator | null {
   for (const definition of variable.defs) {
     if (definition.type === "Variable" && definition.node.type === "VariableDeclarator") {
@@ -288,7 +264,7 @@ function variableDeclarator(variable: Variable): ESTree.VariableDeclarator | nul
 
 function knownValueEvidence(
   expression: ESTree.Expression,
-  scopes: Parameters<typeof resolvedVariableForIdentifier>[0],
+  sourceCode: SourceCode,
   boundary: ESTree.Node | null,
   visitedVariables: ReadonlySet<Variable>,
 ): KnownValueEvidence | null {
@@ -321,7 +297,7 @@ function knownValueEvidence(
     return null;
   }
 
-  const variable = resolvedVariableForIdentifier(scopes, unwrapped);
+  const variable = resolveVariable(sourceCode, unwrapped);
 
   if (variable === null || visitedVariables.has(variable)) {
     return null;
@@ -355,7 +331,7 @@ function knownValueEvidence(
 
   return knownValueEvidence(
     declarator.init,
-    scopes,
+    sourceCode,
     boundary,
     new Set([...visitedVariables, variable]),
   );
@@ -363,7 +339,7 @@ function knownValueEvidence(
 
 function widenedBinding(
   variable: Variable,
-  scopes: Parameters<typeof resolvedVariableForIdentifier>[0],
+  sourceCode: SourceCode,
 ): WidenedBinding | null {
   const declarator = variableDeclarator(variable);
 
@@ -396,7 +372,7 @@ function widenedBinding(
       ? assertedExpression(initializerAssertion)
       : declarator.init;
 
-  const evidence = knownValueEvidence(originalExpression, scopes, boundary, new Set([variable]));
+  const evidence = knownValueEvidence(originalExpression, sourceCode, boundary, new Set([variable]));
 
   return evidence === null ? null : { broadKind, evidence, declaredAt: declarator.end, boundary };
 }
@@ -426,7 +402,6 @@ function assertionIsNarrower(
   return isDefinitelyNarrowerRecordType(assertedType);
 }
 
-/** Detect immutable local bindings that erase a known type and are later asserted back to a narrower type. */
 export const noWidenThenAssertRule = defineRule({
   meta: {
     type: "problem",
@@ -440,8 +415,6 @@ export const noWidenThenAssertRule = defineRule({
     },
   },
   createOnce(context) {
-    let scopes: Parameters<typeof resolvedVariableForIdentifier>[0] = [];
-
     const checkAssertion = (node: ESTree.TSAsExpression | ESTree.TSTypeAssertion) => {
       const expression = assertedExpression(node);
 
@@ -449,13 +422,13 @@ export const noWidenThenAssertRule = defineRule({
         return;
       }
 
-      const variable = resolvedVariableForIdentifier(scopes, expression);
+      const variable = resolveVariable(context.sourceCode, expression);
 
       if (variable === null) {
         return;
       }
 
-      const widened = widenedBinding(variable, scopes);
+      const widened = widenedBinding(variable, context.sourceCode);
 
       if (
         widened === null ||
@@ -479,9 +452,6 @@ export const noWidenThenAssertRule = defineRule({
     };
 
     return {
-      Program() {
-        scopes = context.sourceCode.scopeManager.scopes;
-      },
       TSAsExpression: checkAssertion,
       TSTypeAssertion: checkAssertion,
     };

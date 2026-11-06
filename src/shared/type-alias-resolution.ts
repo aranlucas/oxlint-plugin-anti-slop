@@ -10,24 +10,26 @@ type TypeScope = ESTree.Node;
 
 type TypeBinding = {
   readonly alias: ESTree.TSTypeAliasDeclaration | null;
+  readonly interfaceDeclaration?: ESTree.TSInterfaceDeclaration;
   readonly name: string;
   readonly scope: TypeScope;
 };
 
 type Substitution = {
+  readonly resolvingAliases: ReadonlySet<ESTree.TSTypeAliasDeclaration>;
   readonly substitutions: Substitutions;
   readonly type: ESTree.TSType;
 };
 
-type Substitutions = ReadonlyMap<string, Substitution>;
+export type Substitutions = ReadonlyMap<string, Substitution>;
 
 type DeclaredTypeBinding = {
   readonly alias: ESTree.TSTypeAliasDeclaration | null;
+  readonly interfaceDeclaration?: ESTree.TSInterfaceDeclaration;
   readonly name: string;
 };
 
 export type TypeAliasEnvironment = {
-  readonly aliases: readonly ESTree.TSTypeAliasDeclaration[];
   readonly bindingsByName: ReadonlyMap<string, readonly TypeBinding[]>;
   readonly visitorKeys: VisitorKeys;
 };
@@ -64,8 +66,11 @@ function declaredTypeBinding(node: ESTree.Node): DeclaredTypeBinding | null {
     return { alias: node, name: node.id.name };
   }
 
+  if (node.type === "TSInterfaceDeclaration") {
+    return { alias: null, name: node.id.name, interfaceDeclaration: node };
+  }
+
   if (
-    node.type === "TSInterfaceDeclaration" ||
     node.type === "TSEnumDeclaration" ||
     node.type === "ClassDeclaration" ||
     node.type === "ClassExpression"
@@ -88,7 +93,6 @@ function collectTypeBindings(
   node: ESTree.Node,
   visitorKeys: VisitorKeys,
   bindingsByName: Map<string, TypeBinding[]>,
-  aliases: ESTree.TSTypeAliasDeclaration[],
 ): void {
   const declared = declaredTypeBinding(node);
 
@@ -96,18 +100,13 @@ function collectTypeBindings(
     const bindings = bindingsByName.get(declared.name) ?? [];
     bindings.push({ ...declared, scope: enclosingTypeScope(node) });
     bindingsByName.set(declared.name, bindings);
-
-    if (declared.alias !== null) {
-      aliases.push(declared.alias);
-    }
   }
 
   for (const child of childNodes(node, visitorKeys)) {
-    collectTypeBindings(child, visitorKeys, bindingsByName, aliases);
+    collectTypeBindings(child, visitorKeys, bindingsByName);
   }
 }
 
-/** Collect every lexical type alias and competing type binding in a program. */
 export function createTypeAliasEnvironment(
   program: ESTree.Program,
   visitorKeys: VisitorKeys,
@@ -119,9 +118,8 @@ export function createTypeAliasEnvironment(
   }
 
   const bindingsByName = new Map<string, TypeBinding[]>();
-  const aliases: ESTree.TSTypeAliasDeclaration[] = [];
-  collectTypeBindings(program, visitorKeys, bindingsByName, aliases);
-  const environment = { aliases, bindingsByName, visitorKeys };
+  collectTypeBindings(program, visitorKeys, bindingsByName);
+  const environment = { bindingsByName, visitorKeys };
   environmentsByProgram.set(program, environment);
 
   return environment;
@@ -172,7 +170,6 @@ function nearestTypeBindings(
   return nearest;
 }
 
-/** Resolve the nearest visible alias with this name, respecting lexical shadowing. */
 export function visibleTypeAlias(
   name: string,
   use: ESTree.Node,
@@ -187,7 +184,26 @@ export function visibleTypeAlias(
   return bindings.length === 1 ? (bindings[0]?.alias ?? null) : null;
 }
 
-/** Return whether a local declaration shadows a built-in type at this use. */
+export function visibleTypeInterfaces(
+  name: string,
+  use: ESTree.Node,
+  environment: TypeAliasEnvironment,
+): readonly ESTree.TSInterfaceDeclaration[] {
+  if (lexicalTypeParameterNames(use, environment.visitorKeys).has(name)) {
+    return [];
+  }
+
+  const bindings = nearestTypeBindings(name, use, environment);
+
+  if (bindings.some((binding) => binding.interfaceDeclaration === undefined)) {
+    return [];
+  }
+
+  return bindings.flatMap((binding) =>
+    binding.interfaceDeclaration === undefined ? [] : [binding.interfaceDeclaration],
+  );
+}
+
 export function hasVisibleTypeBinding(
   name: string,
   use: ESTree.Node,
@@ -203,14 +219,15 @@ function typeReferenceName(type: ESTree.TSTypeReference): string | null {
   return type.typeName.type === "Identifier" ? type.typeName.name : null;
 }
 
-function aliasSubstitutions(
+export function aliasSubstitutions(
   alias: ESTree.TSTypeAliasDeclaration,
   reference: ESTree.TSTypeReference,
   base: Substitutions,
+  resolvingAliases: ReadonlySet<ESTree.TSTypeAliasDeclaration>,
 ): Substitutions | null {
   const parameters = alias.typeParameters?.params ?? [];
   const typeArguments = reference.typeArguments?.params ?? [];
-  const next = new Map(base);
+  const next = new Map<string, Substitution>();
 
   for (const [index, parameter] of parameters.entries()) {
     const explicitArgument = typeArguments[index];
@@ -223,6 +240,9 @@ function aliasSubstitutions(
     const argumentSubstitutions = explicitArgument === undefined ? next : base;
     next.set(parameter.name.name, {
       type: argument,
+      resolvingAliases: explicitArgument === undefined
+        ? new Set([...resolvingAliases, alias])
+        : resolvingAliases,
       substitutions: new Map(argumentSubstitutions),
     });
   }
@@ -230,7 +250,6 @@ function aliasSubstitutions(
   return next;
 }
 
-/** Match a type after resolving visible aliases and substituting their type parameters. */
 export function resolvedTypeMatches(
   type: ESTree.TSType,
   environment: TypeAliasEnvironment,
@@ -248,13 +267,13 @@ export function resolvedTypeMatches(
         const substitution = substitutions.get(name);
 
         if (substitution !== undefined && !current.typeArguments?.params.length) {
-          return evaluate(substitution.type, substitution.substitutions, resolvingAliases);
+          return evaluate(substitution.type, substitution.substitutions, substitution.resolvingAliases);
         }
 
         const alias = visibleTypeAlias(name, current, environment);
 
         if (alias !== null && !resolvingAliases.has(alias)) {
-          const nextSubstitutions = aliasSubstitutions(alias, current, substitutions);
+          const nextSubstitutions = aliasSubstitutions(alias, current, substitutions, resolvingAliases);
 
           if (nextSubstitutions !== null) {
             const nextResolving = new Set([...resolvingAliases, alias]);

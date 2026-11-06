@@ -1,9 +1,10 @@
 import type { ESTree, Scope, SourceCode, Variable } from "@oxlint/plugins";
 
-/** Resolve an identifier to its binding by walking lexical scopes upward. */
+type IdentifierKind = { readonly type: "Identifier" };
+
 export function resolveVariable(
   sourceCode: SourceCode,
-  identifier: ESTree.IdentifierReference,
+  identifier: Extract<ESTree.Node, IdentifierKind>,
 ): Variable | null {
   let scope: Scope | null = sourceCode.getScope(identifier);
 

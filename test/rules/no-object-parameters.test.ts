@@ -24,6 +24,9 @@ tester.run("anti-slop/no-object-parameters", noObjectParametersRule, {
     "function one() { type Payload = object; } function two() { function consume(value: Payload) {} }",
   ],
   invalid: [
+    { code: "interface Callable { (value: object): void; new(value: object): Owner }", errors: [error, error] },
+    { code: "type Factory = new(value: object) => Owner;", errors: [error] },
+
     { code: "function f(value: object) {}", errors: [error] },
     { code: "type Alias = object; function f(value: Alias) {}", errors: [error] },
     { code: "type Alias = (object); function f(value: Alias) {}", errors: [error] },

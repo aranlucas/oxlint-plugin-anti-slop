@@ -19,6 +19,9 @@ tester.run("anti-slop/no-unknown-parameters", noUnknownParametersRule, {
     "function parse(value: string | number): void {}",
   ],
   invalid: [
+    { code: "interface Callable { (value: unknown): void; new(value: unknown): Owner }", errors: [error, error] },
+    { code: "type Factory = new(value: unknown) => Owner;", errors: [error] },
+
     { code: "function parse(value: unknown): void {}", errors: [error] },
     { code: "function parse(value: string | unknown): void {}", errors: [error] },
     {

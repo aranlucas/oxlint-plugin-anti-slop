@@ -8,6 +8,10 @@ const error = { messageId: "unsafeDictionary" };
 
 tester.run("anti-slop/no-unsafe-dictionary-type", noUnsafeDictionaryTypeRule, {
   valid: [
+    "class Value { id = 'x' } interface Value {} type A = Record<string, Value>;",
+    "interface Value {} function f() { type Value = { id: string }; type A = Record<string, Value>; }",
+    "interface Value {} function f<Value>() { type A = Record<string, Value>; }",
+    "type Identity<T> = T; type Outer<T> = Identity<Readonly<T>>; type A = Record<string, Outer<{ id: string }>>;",
     "type Commands = Record<string, Command>;",
     "type Metadata = Record<PropertyKey, JsonValue>;",
     "type PermissionLevels = Record<Permission, number>;",
@@ -37,6 +41,22 @@ tester.run("anti-slop/no-unsafe-dictionary-type", noUnsafeDictionaryTypeRule, {
     "type Deep<T extends Readonly<Record<string, unknown>>> = T;",
   ],
   invalid: [
+    {
+      code: "type Identity<T> = T; type A = Record<string, Identity<Identity<unknown>>>;",
+      errors: [error],
+    },
+    {
+      code: "type T = unknown; type Inner<U> = T; type Outer<T> = Inner<T>; type A = Record<string, Outer<string>>;",
+      errors: [error],
+    },
+    {
+      code: "function f() { interface Value {} type A = Record<string, Value>; }",
+      errors: [error],
+    },
+    {
+      code: "type Identity<T> = T; type Outer<T> = Identity<Readonly<T>>; type A = Record<string, Outer<unknown>>;",
+      errors: [error],
+    },
     { code: "type A = Record<string, unknown>;", errors: [error] },
     { code: "type A = { [key: string]: any };", errors: [error] },
     { code: "type A = { [index: number]: Command; [key: string]: unknown | Command };", errors: 1 },

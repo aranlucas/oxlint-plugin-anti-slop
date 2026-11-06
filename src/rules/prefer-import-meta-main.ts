@@ -19,7 +19,6 @@ function isMember(node: ESTree.Node, name: string): node is ESTree.MemberExpress
     : property.type === "Identifier" && property.name === name;
 }
 
-/** Resolve static Node imports, including aliases, without trusting a local name. */
 function importSpecifier(
   sourceCode: SourceCode,
   identifier: ESTree.IdentifierReference,
@@ -173,7 +172,6 @@ function comparesEntryPoint(
   return isModuleFilename(sourceCode, module) && isEntryPath(sourceCode, entry);
 }
 
-/** Prefer runtime entry-point identity in projects whose supported Node versions provide it. */
 export const preferImportMetaMainRule = defineRule({
   meta: {
     type: "suggestion",

@@ -8,6 +8,8 @@ const error = { messageId: "unknownReturn" };
 
 tester.run("anti-slop/no-unknown-returns", noUnknownReturnsRule, {
   valid: [
+    "interface Promise<T> { value: T } function f(): Promise<unknown> { return value; }",
+    "interface PromiseLike<T> { value: T } function f(): PromiseLike<unknown> { return value; }",
     "function parse(): ImportedValue { return input; }",
     "function parse(): User { return user; }",
     "function infer() { return input; }",
@@ -22,6 +24,9 @@ tester.run("anti-slop/no-unknown-returns", noUnknownReturnsRule, {
     "type Value = unknown; function outer() { type Value = User; function load(): Value { return user; } }",
   ],
   invalid: [
+    { code: "interface Callable { (): unknown; new(): unknown }", errors: [error, error] },
+    { code: "type Factory = new() => unknown;", errors: [error] },
+
     { code: "function load(): unknown { return input; }", errors: [error] },
     { code: "const load = (): unknown => input;", errors: [error] },
     { code: "type Loader = () => unknown;", errors: [error] },

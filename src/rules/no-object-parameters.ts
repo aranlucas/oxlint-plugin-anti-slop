@@ -1,5 +1,7 @@
 import { defineRule } from "@oxlint/plugins";
 
+import { functionContractVisitors, type FunctionContract } from "../shared/function-contracts.ts";
+
 import type { ESTree } from "@oxlint/plugins";
 
 import {
@@ -12,16 +14,6 @@ import {
   type TypeAliasEnvironment,
 } from "../shared/type-alias-resolution.ts";
 
-type ParameterOwner =
-  | ESTree.ArrowFunctionExpression
-  | ESTree.Function
-  | ESTree.TSCallSignatureDeclaration
-  | ESTree.TSConstructSignatureDeclaration
-  | ESTree.TSConstructorType
-  | ESTree.TSFunctionType
-  | ESTree.TSMethodSignature;
-
-/** Ban the broad object type on function inputs, including local aliases to object. */
 export const noObjectParametersRule = defineRule({
   meta: {
     type: "problem",
@@ -51,7 +43,7 @@ export const noObjectParametersRule = defineRule({
         return resolved.type === "TSUnionType" && resolved.types.some(matches);
       });
 
-    const checkParameters = (node: ParameterOwner) => {
+    const checkParameters = (node: FunctionContract) => {
       for (const parameter of node.params) {
         const annotation = functionParameterTypeAnnotation(parameter);
 
@@ -75,16 +67,7 @@ export const noObjectParametersRule = defineRule({
       Program(node) {
         environment = createTypeAliasEnvironment(node, context.sourceCode.visitorKeys);
       },
-      ArrowFunctionExpression: checkParameters,
-      FunctionDeclaration: checkParameters,
-      FunctionExpression: checkParameters,
-      TSCallSignatureDeclaration: checkParameters,
-      TSConstructSignatureDeclaration: checkParameters,
-      TSConstructorType: checkParameters,
-      TSDeclareFunction: checkParameters,
-      TSEmptyBodyFunctionExpression: checkParameters,
-      TSFunctionType: checkParameters,
-      TSMethodSignature: checkParameters,
+      ...functionContractVisitors(checkParameters),
     };
   },
 });

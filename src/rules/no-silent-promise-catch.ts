@@ -66,7 +66,6 @@ function discardsFailure(sourceCode: SourceCode, handler: RejectionHandler): boo
   });
 }
 
-/** Require handling or an explanation when an inline rejection handler discards a failure. */
 export const noSilentPromiseCatchRule = defineRule({
   meta: {
     type: "problem",
