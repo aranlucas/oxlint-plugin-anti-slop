@@ -51,16 +51,16 @@
     "@oxlint/plugins": "^1.89.0"
   },
   "devDependencies": {
-    "@aranlucas/oxforge": "0.3.0",
+    "@aranlucas/oxforge": "0.3.1",
     "@types/node": "26.6.6",
     "e2e": "0.23.0",
     "husky": "^9.1.7",
     "lint-staged": "^17.6.0",
-    "oxfmt": "^0.75.0",
+    "oxfmt": "^0.78.0",
     "oxlint": "^1.89.0",
     "oxlint-tsgolint": "^7.0.2004",
     "typescript": "7.0.2",
-    "vitest": "5.0.5"
+    "vitest": "5.1.0"
   },
   "peerDependencies": {
     "oxlint": ">=1.78.0"
