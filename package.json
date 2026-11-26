@@ -53,14 +53,14 @@
   "devDependencies": {
     "@aranlucas/oxforge": "0.3.1",
     "@types/node": "26.6.6",
-    "e2e": "0.23.1",
+    "e2e": "0.24.0",
     "husky": "^9.1.7",
     "lint-staged": "^17.6.0",
     "oxfmt": "^0.79.0",
     "oxlint": "^1.89.0",
     "oxlint-tsgolint": "^7.0.2004",
     "typescript": "7.0.2",
-    "vitest": "5.1.0"
+    "vitest": "5.1.1"
   },
   "peerDependencies": {
     "oxlint": ">=1.78.0"
